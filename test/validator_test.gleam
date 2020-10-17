@@ -19,7 +19,7 @@ type ValidUser {
   )
 }
 
-fn user_validator(user: DirtyUser) {
+fn user_validator(user: DirtyUser) -> Result(ValidUser, List(String)) {
   Ok(validator.map3(ValidUser))
   |> validator.validate(user.name, v_option.is_some("Please provide a name"))
   |> validator.validate(user.email, v_option.is_some("Please provide an email"))
@@ -34,7 +34,7 @@ pub fn invalid_test() {
   )
 
   user_validator(invalid)
-  |> should.equal(Error("Is none"))
+  |> should.equal(Error(["Is none"]))
 }
 
 pub fn valid_test() {

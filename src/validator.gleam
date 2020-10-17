@@ -1,10 +1,10 @@
 import gleam/result
 
 pub fn validate(
-		accumulator: Result(fn(b) -> next_accumulator, String),
+		accumulator: Result(fn(b) -> next_accumulator, List(String)),
 		value: a,
-		validator: fn(a) -> Result(b, String)
-	) -> Result(next_accumulator, String) {
+		validator: fn(a) -> Result(b, List(String))
+	) -> Result(next_accumulator, List(String)) {
 
 	case validator(value) {
 		Error(err) ->
@@ -19,9 +19,9 @@ pub fn validate(
 }
 
 pub fn keep(
-		accumulator: Result(fn(value) -> next_accumulator, String),
+		accumulator: Result(fn(value) -> next_accumulator, List(String)),
 		value: value
-	) -> Result(next_accumulator, String) {
+	) -> Result(next_accumulator, List(String)) {
 
 		case accumulator {
 			Error(e) ->
