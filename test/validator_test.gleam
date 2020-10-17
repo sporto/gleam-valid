@@ -18,20 +18,8 @@ type ValidUser {
   )
 }
 
-fn make_valid_user(name: String) {
-  fn(email: String) {
-    fn(age: Int) -> ValidUser {
-      ValidUser(
-        name: name,
-        email: email,
-        age: age,
-      )
-    }
-  }
-}
-
 fn user_validator(user: DirtyUser) {
-  Ok(make_valid_user)
+  Ok(validator.map3(ValidUser))
   |> validator.validate(user.name, validator.not_maybe)
   |> validator.validate(user.email, validator.not_maybe)
   |> validator.keep(user.age)
