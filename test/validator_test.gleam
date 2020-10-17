@@ -1,4 +1,5 @@
 import validator
+import validator/option as v_option
 import gleam/should
 import gleam/option.{None, Option, Some}
 
@@ -20,12 +21,12 @@ type ValidUser {
 
 fn user_validator(user: DirtyUser) {
   Ok(validator.map3(ValidUser))
-  |> validator.validate(user.name, validator.not_maybe)
-  |> validator.validate(user.email, validator.not_maybe)
+  |> validator.validate(user.name, v_option.is_some("Please provide a name"))
+  |> validator.validate(user.email, v_option.is_some("Please provide an email"))
   |> validator.keep(user.age)
 }
 
-pub fn validator_test() {
+pub fn invalid_test() {
   let invalid = DirtyUser(
     name: None,
     email: None,
@@ -34,7 +35,9 @@ pub fn validator_test() {
 
   user_validator(invalid)
   |> should.equal(Error("Is none"))
+}
 
+pub fn valid_test() {
   let valid_input = DirtyUser(
     name: Some("Sam"),
     email: Some("sam@sample.com"),
