@@ -53,3 +53,31 @@ pub fn valid_test() {
 	user_validator(valid_input)
 	|> should.equal(Ok(valid))
 }
+
+type Thing {
+	Thing(name: String)
+}
+
+pub fn custom_validator_test() {
+	let must_be_one = fn(name: String) {
+		name == "One"
+	}
+
+	let custom_validator = validator
+		.custom_validator("Must be One", must_be_one)
+
+	let validator = fn(thing: Thing) {
+		Ok(Thing)
+		|> validator.validate(thing.name, custom_validator)
+	}
+
+	let thing_one = Thing("One")
+
+	validator(thing_one)
+	|> should.equal(Ok(Thing("One")))
+
+	let thing_two = Thing("Two")
+
+	validator(thing_two)
+	|> should.equal(Error(["Must be One"]))
+}

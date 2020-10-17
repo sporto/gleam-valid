@@ -41,6 +41,21 @@ pub fn keep(
 		}
 }
 
+pub fn custom_validator(
+		error: error,
+		check: fn(value) -> Bool
+	) {
+
+	fn(value: value) {
+		case check(value) {
+			True ->
+				Ok(value)
+			False ->
+				Error([error])
+		}
+	}
+}
+
 pub fn map2(constructor: fn(a, b) -> value) {
 	fn(a) {
 		fn(b) {
