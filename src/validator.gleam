@@ -1,3 +1,4 @@
+import gleam/list
 import gleam/result
 
 pub fn validate(
@@ -7,14 +8,23 @@ pub fn validate(
 	) -> Result(next_accumulator, List(String)) {
 
 	case validator(value) {
-		Error(err) ->
-			Error(err)
-
 		Ok(value) ->
 			accumulator
 				|> result.map(
 					fn(acc) { acc(value) }
 				)
+
+		Error(errors) ->
+			case accumulator {
+				Ok(_) ->
+					Error(errors)
+
+				Error(previous_errors) ->
+					Error(
+						list.flatten([previous_errors, errors])
+					)
+			}
+
 	}
 }
 
@@ -24,8 +34,8 @@ pub fn keep(
 	) -> Result(next_accumulator, List(String)) {
 
 		case accumulator {
-			Error(e) ->
-				Error(e)
+			Error(errors) ->
+				Error(errors)
 			Ok(acc) ->
 				Ok(acc(value))
 		}
