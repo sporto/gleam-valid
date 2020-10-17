@@ -34,7 +34,7 @@ pub fn invalid_test() {
   )
 
   user_validator(invalid)
-  |> should.equal(Error(["Is none"]))
+  |> should.equal(Error(["Please provide an email"]))
 }
 
 pub fn valid_test() {
