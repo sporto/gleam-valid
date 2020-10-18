@@ -1,7 +1,12 @@
 import gleam/option.{None, Option, Some}
-import gleam/function
 import validator/common
 
 pub fn is_some(error: e) {
-  common.custom_validator(error, function.identity)
+  let check = fn(maybe: Option(value)) -> Result(value, e) {
+    case maybe {
+      None -> Error(error)
+      Some(value) -> Ok(value)
+    }
+  }
+  common.custom_validator(check)
 }

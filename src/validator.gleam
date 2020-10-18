@@ -30,8 +30,8 @@ pub fn keep(
   }
 }
 
-pub fn custom_validator(error, check) {
-  common.custom_validator(error, check)
+pub fn custom_validator(check) {
+  common.custom_validator(check)
 }
 
 fn curry2(constructor: fn(a, b) -> value) {

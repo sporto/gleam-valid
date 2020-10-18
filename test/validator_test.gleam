@@ -41,14 +41,14 @@ type Thing {
 }
 
 pub fn custom_validator_test() {
-  let must_be_one = fn(name: String) -> Option(String) {
+  let must_be_one = fn(name: String) -> Result(String, String) {
     case name == "One" {
-      True -> Some(name)
-      False -> None
+      True -> Ok(name)
+      False -> Error("Must be One")
     }
   }
 
-  let custom_validator = validator.custom_validator("Must be One", must_be_one)
+  let custom_validator = validator.custom_validator(must_be_one)
 
   let validator = fn(thing: Thing) {
     validator.begin1(Thing)
