@@ -116,6 +116,10 @@ fn curry6(constructor: fn(a, b, c, d, e, f) -> value) {
 	}
 }
 
+pub fn begin1(constructor) {
+	Ok(constructor)
+}
+
 pub fn begin2(constructor) {
 	Ok(curry2(constructor))
 }

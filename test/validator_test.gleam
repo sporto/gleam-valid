@@ -1,5 +1,6 @@
 import validator
 import validator/option as v_option
+import validator/string as v_string
 import gleam/should
 import gleam/option.{None, Option, Some}
 
@@ -67,7 +68,7 @@ pub fn custom_validator_test() {
 		.custom_validator("Must be One", must_be_one)
 
 	let validator = fn(thing: Thing) {
-		Ok(Thing)
+		validator.begin1(Thing)
 		|> validator.validate(thing.name, custom_validator)
 	}
 
@@ -80,4 +81,22 @@ pub fn custom_validator_test() {
 
 	validator(thing_two)
 	|> should.equal(Error(["Must be One"]))
+}
+
+pub fn string_not_empty() {
+	let validator = fn(thing: Thing) {
+		validator.begin1(Thing)
+		|> validator.validate(
+			thing.name, v_string.is_not_empty("Empty"))
+	}
+
+	let thing_one = Thing("One")
+
+	validator(thing_one)
+	|> should.equal(Ok(Thing("One")))
+
+	let thing_two = Thing("")
+
+	validator(thing_two)
+	|> should.equal(Error(["Empty"]))
 }
