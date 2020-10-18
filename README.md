@@ -1,20 +1,26 @@
 # validator
 
-A Gleam program
+A Gleam validation library
 
-
-## Quick start
+## Test
 
 ```sh
 # Build the project
 rebar3 compile
-
-# Run the eunit tests
-rebar3 eunit
-
-# Run the Erlang REPL
-rebar3 shell
 ```
+
+## TODO
+
+- Compose
+- list.is_not_empty
+- list.min_length
+- list.max_length
+- list.every
+- number.min
+- number.max
+- string.is_email
+- string.min_length
+- string.max_length
 
 
 ## Installation
