@@ -61,7 +61,7 @@ pub fn custom_validator_test() {
   |> should.equal(Error(["Must be One"]))
 }
 
-pub fn string_not_empty() {
+pub fn string_not_empty_test() {
   let validator = fn(thing: Thing) {
     validator.begin1(Thing)
     |> validator.validate(thing.name, v_string.is_not_empty("Empty"))
@@ -76,4 +76,38 @@ pub fn string_not_empty() {
 
   validator(thing_two)
   |> should.equal(Error(["Empty"]))
+}
+
+pub fn string_min_length_test() {
+  let validator = fn(thing: Thing) {
+    validator.begin1(Thing)
+    |> validator.validate(thing.name, v_string.min_length("Less than 3", 3))
+  }
+
+  let thing_one = Thing("One")
+
+  validator(thing_one)
+  |> should.equal(Ok(Thing("One")))
+
+  let thing_two = Thing("Tw")
+
+  validator(thing_two)
+  |> should.equal(Error(["Less than 3"]))
+}
+
+pub fn string_max_length_test() {
+  let validator = fn(thing: Thing) {
+    validator.begin1(Thing)
+    |> validator.validate(thing.name, v_string.max_length("More than 5", 5))
+  }
+
+  let thing_one = Thing("One")
+
+  validator(thing_one)
+  |> should.equal(Ok(Thing("One")))
+
+  let thing_two = Thing("Two and Three")
+
+  validator(thing_two)
+  |> should.equal(Error(["More than 5"]))
 }
