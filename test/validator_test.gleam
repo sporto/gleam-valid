@@ -20,7 +20,7 @@ type ValidUser {
 }
 
 fn user_validator(user: DirtyUser) -> Result(ValidUser, List(String)) {
-	Ok(validator.map3(ValidUser))
+	validator.begin3(ValidUser)
 	|> validator.validate(user.name, v_option.is_some("Please provide a name"))
 	|> validator.validate(user.email, v_option.is_some("Please provide an email"))
 	|> validator.keep(user.age)

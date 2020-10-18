@@ -56,7 +56,7 @@ pub fn custom_validator(
 	}
 }
 
-pub fn map2(constructor: fn(a, b) -> value) {
+fn curry2(constructor: fn(a, b) -> value) {
 	fn(a) {
 		fn(b) {
 				constructor(a, b)
@@ -64,7 +64,7 @@ pub fn map2(constructor: fn(a, b) -> value) {
 	}
 }
 
-pub fn map3(constructor: fn(a, b, c) -> value) {
+fn curry3(constructor: fn(a, b, c) -> value) {
 	fn(a) {
 		fn(b) {
 			fn(c) {
@@ -74,7 +74,7 @@ pub fn map3(constructor: fn(a, b, c) -> value) {
 	}
 }
 
-pub fn map4(constructor: fn(a, b, c, d) -> value) {
+fn curry4(constructor: fn(a, b, c, d) -> value) {
 	fn(a) {
 		fn(b) {
 			fn(c) {
@@ -86,7 +86,7 @@ pub fn map4(constructor: fn(a, b, c, d) -> value) {
 	}
 }
 
-pub fn map5(constructor: fn(a, b, c, d, e) -> value) {
+fn curry5(constructor: fn(a, b, c, d, e) -> value) {
 	fn(a) {
 		fn(b) {
 			fn(c) {
@@ -100,7 +100,7 @@ pub fn map5(constructor: fn(a, b, c, d, e) -> value) {
 	}
 }
 
-pub fn map6(constructor: fn(a, b, c, d, e, f) -> value) {
+fn curry6(constructor: fn(a, b, c, d, e, f) -> value) {
 	fn(a) {
 		fn(b) {
 			fn(c) {
@@ -114,4 +114,24 @@ pub fn map6(constructor: fn(a, b, c, d, e, f) -> value) {
 			}
 		}
 	}
+}
+
+pub fn begin2(constructor) {
+	Ok(curry2(constructor))
+}
+
+pub fn begin3(constructor) {
+	Ok(curry3(constructor))
+}
+
+pub fn begin4(constructor) {
+	Ok(curry4(constructor))
+}
+
+pub fn begin5(constructor) {
+	Ok(curry5(constructor))
+}
+
+pub fn begin6(constructor) {
+	Ok(curry6(constructor))
 }
