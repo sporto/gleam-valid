@@ -27,10 +27,17 @@ pub fn invalid_test() {
 }
 
 pub fn valid_test() {
-	let valid_input =
-		DirtyUser(name: Some("Sam"), email: Some("sam@sample.com"), age: 11)
+	let valid_input = DirtyUser(
+		name: Some("Sam"),
+		email: Some("sam@sample.com"),
+		age: 11
+	)
 
-	let valid = ValidUser(name: "Sam", email: "sam@sample.com", age: 11)
+	let valid = ValidUser(
+		name: "Sam",
+		email: "sam@sample.com",
+		age: 11
+	)
 
 	user_validator(valid_input)
 	|> should.equal(Ok(valid))
@@ -41,14 +48,16 @@ type Thing {
 }
 
 pub fn custom_validator_test() {
-	let must_be_one = fn(name: String) -> Result(String, String) {
+	let must_be_one = fn(name: String) -> Option(String) {
 		case name == "One" {
-			True -> Ok(name)
-			False -> Error("Must be One")
+			True ->
+				Some(name)
+			False ->
+				None
 		}
 	}
 
-	let custom_validator = validator.custom_validator(must_be_one)
+	let custom_validator = validator.custom_validator("Must be One", must_be_one)
 
 	let validator = fn(thing: Thing) {
 		validator.begin1(Thing)

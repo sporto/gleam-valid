@@ -1,12 +1,16 @@
 import gleam/option.{None, Option, Some}
 import validator/common
 
-pub fn is_some(error: e) {
-	let check = fn(maybe: Option(value)) -> Result(value, e) {
-		case maybe {
-			None -> Error(error)
-			Some(value) -> Ok(value)
-		}
+fn is_some_check(
+		maybe: Option(value),
+	) -> Option(value) {
+
+	case maybe {
+		None -> None
+		Some(value) -> Some(value)
 	}
-	common.custom_validator(check)
+}
+
+pub fn is_some(error: e) {
+	common.custom_validator(error, is_some_check)
 }

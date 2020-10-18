@@ -1,8 +1,17 @@
-pub fn custom_validator(check: fn(input) -> Result(output, error)) {
+import gleam/option.{None, Option, Some}
+
+pub fn custom_validator(
+		error: e,
+		check: fn(input) -> Option(output)
+	) {
+
 	fn(input: input) {
 		case check(input) {
-			Ok(output) -> Ok(output)
-			Error(error) -> Error([error])
+			Some(output) ->
+				Ok(output)
+
+			None ->
+				Error([error])
 		}
 	}
 }

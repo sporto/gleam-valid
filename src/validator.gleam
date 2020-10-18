@@ -3,10 +3,10 @@ import gleam/result
 import validator/common
 
 pub fn validate(
-	accumulator: Result(fn(b) -> next_accumulator, List(String)),
+	accumulator: Result(fn(b) -> next_accumulator, List(e)),
 	value: a,
-	validator: fn(a) -> Result(b, List(String)),
-) -> Result(next_accumulator, List(String)) {
+	validator: fn(a) -> Result(b, List(e)),
+) -> Result(next_accumulator, List(e)) {
 	case validator(value) {
 		Ok(value) ->
 			accumulator
@@ -21,17 +21,17 @@ pub fn validate(
 }
 
 pub fn keep(
-	accumulator: Result(fn(value) -> next_accumulator, List(String)),
+	accumulator: Result(fn(value) -> next_accumulator, List(e)),
 	value: value,
-) -> Result(next_accumulator, List(String)) {
+) -> Result(next_accumulator, List(e)) {
 	case accumulator {
 		Error(errors) -> Error(errors)
 		Ok(acc) -> Ok(acc(value))
 	}
 }
 
-pub fn custom_validator(check) {
-	common.custom_validator(check)
+pub fn custom_validator(error, check) {
+	common.custom_validator(error, check)
 }
 
 fn curry2(constructor: fn(a, b) -> value) {
