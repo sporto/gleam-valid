@@ -1,5 +1,6 @@
 import gleam/list
 import gleam/result
+import validator/common
 
 pub fn validate(
   accumulator: Result(fn(b) -> next_accumulator, List(String)),
@@ -29,13 +30,8 @@ pub fn keep(
   }
 }
 
-pub fn custom_validator(error: error, check: fn(value) -> Bool) {
-  fn(value: value) {
-    case check(value) {
-      True -> Ok(value)
-      False -> Error([error])
-    }
-  }
+pub fn custom_validator(error, check) {
+  common.custom_validator(error, check)
 }
 
 fn curry2(constructor: fn(a, b) -> value) {

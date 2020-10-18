@@ -1,10 +1,7 @@
 import gleam/option.{None, Option, Some}
+import gleam/function
+import validator/common
 
 pub fn is_some(error: e) {
-  fn(maybe: Option(a)) -> Result(a, List(e)) {
-    case maybe {
-      None -> Error([error])
-      Some(a) -> Ok(a)
-    }
-  }
+  common.custom_validator(error, function.identity)
 }

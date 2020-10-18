@@ -41,7 +41,12 @@ type Thing {
 }
 
 pub fn custom_validator_test() {
-  let must_be_one = fn(name: String) { name == "One" }
+  let must_be_one = fn(name: String) -> Option(String) {
+    case name == "One" {
+      True -> Some(name)
+      False -> None
+    }
+  }
 
   let custom_validator = validator.custom_validator("Must be One", must_be_one)
 
