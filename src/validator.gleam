@@ -58,26 +58,26 @@ fn curry6(constructor: fn(a, b, c, d, e, f) -> value) {
 	}
 }
 
-pub fn begin1(constructor) {
+pub fn build1(constructor) {
 	Ok(constructor)
 }
 
-pub fn begin2(constructor) {
+pub fn build2(constructor) {
 	Ok(curry2(constructor))
 }
 
-pub fn begin3(constructor) {
+pub fn build3(constructor) {
 	Ok(curry3(constructor))
 }
 
-pub fn begin4(constructor) {
+pub fn build4(constructor) {
 	Ok(curry4(constructor))
 }
 
-pub fn begin5(constructor) {
+pub fn build5(constructor) {
 	Ok(curry5(constructor))
 }
 
-pub fn begin6(constructor) {
+pub fn build6(constructor) {
 	Ok(curry6(constructor))
 }

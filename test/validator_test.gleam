@@ -21,7 +21,7 @@ type Error {
 }
 
 fn user_validator(user: InputUser) -> Result(ValidUser, List(String)) {
-	validator.begin3(ValidUser)
+	validator.build3(ValidUser)
 	|> validator.validate(user.name, v_option.is_some("Please provide a name"))
 	|> validator.validate(user.email, v_option.is_some("Please provide an email"))
 	|> validator.keep(user.age)
@@ -53,7 +53,7 @@ pub fn valid_test() {
 
 pub fn error_type_test() {
 	let validator = fn(thing: Thing) {
-		validator.begin1(Thing)
+		validator.build1(Thing)
 		|> validator.validate(thing.name, v_string.is_not_empty(ErrorEmpty))
 	}
 
@@ -76,7 +76,7 @@ pub fn custom_validator_test() {
 	let custom_validator = validator.custom_validator("Must be One", must_be_one)
 
 	let validator = fn(thing: Thing) {
-		validator.begin1(Thing)
+		validator.build1(Thing)
 		|> validator.validate(thing.name, custom_validator)
 	}
 
@@ -93,7 +93,7 @@ pub fn custom_validator_test() {
 
 pub fn string_not_empty_test() {
 	let validator = fn(thing: Thing) {
-		validator.begin1(Thing)
+		validator.build1(Thing)
 		|> validator.validate(thing.name, v_string.is_not_empty("Empty"))
 	}
 
@@ -110,7 +110,7 @@ pub fn string_not_empty_test() {
 
 pub fn string_min_length_test() {
 	let validator = fn(thing: Thing) {
-		validator.begin1(Thing)
+		validator.build1(Thing)
 		|> validator.validate(thing.name, v_string.min_length("Less than 3", 3))
 	}
 
@@ -127,7 +127,7 @@ pub fn string_min_length_test() {
 
 pub fn string_max_length_test() {
 	let validator = fn(thing: Thing) {
-		validator.begin1(Thing)
+		validator.build1(Thing)
 		|> validator.validate(thing.name, v_string.max_length("More than 5", 5))
 	}
 
