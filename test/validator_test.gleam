@@ -1,4 +1,4 @@
-import validator
+import validator.{ValidatorResult}
 import validator/option as v_option
 import validator/string as v_string
 import gleam/should
@@ -20,18 +20,31 @@ type Error {
 	ErrorEmpty
 }
 
-fn user_validator(user: InputUser) -> Result(ValidUser, List(String)) {
+fn user_validator(user: InputUser) -> ValidatorResult(ValidUser, String) {
 	validator.build3(ValidUser)
-	|> validator.validate(user.name, v_option.is_some("Please provide a name"))
-	|> validator.validate(user.email, v_option.is_some("Please provide an email"))
+	|> validator.validate(
+		user.name,
+		v_option.is_some("Please provide a name")
+	)
+	|> validator.validate(
+		user.email,
+		v_option.is_some("Please provide an email")
+	)
 	|> validator.keep(user.age)
 }
 
 pub fn invalid_test() {
 	let invalid = InputUser(name: None, email: None, age: 0)
 
+	let expected = Error(
+		tuple(
+			"Please provide a name",
+			["Please provide a name", "Please provide an email"]
+		)
+	)
+
 	user_validator(invalid)
-	|> should.equal(Error(["Please provide a name", "Please provide an email"]))
+	|> should.equal(expected)
 }
 
 pub fn valid_test() {
@@ -59,8 +72,10 @@ pub fn error_type_test() {
 
 	let thing = Thing("")
 
+	let expected = Error(tuple(ErrorEmpty, [ErrorEmpty]))
+
 	validator(thing)
-	|> should.equal(Error([ErrorEmpty]))
+	|> should.equal(expected)
 }
 
 pub fn custom_validator_test() {
@@ -87,8 +102,10 @@ pub fn custom_validator_test() {
 
 	let thing_two = Thing("Two")
 
+	let expected_error = Error(tuple("Must be One", ["Must be One"]))
+
 	validator(thing_two)
-	|> should.equal(Error(["Must be One"]))
+	|> should.equal(expected_error)
 }
 
 pub fn string_not_empty_test() {
@@ -104,8 +121,10 @@ pub fn string_not_empty_test() {
 
 	let thing_two = Thing("")
 
+	let expected_error = Error(tuple("Empty", ["Empty"]))
+
 	validator(thing_two)
-	|> should.equal(Error(["Empty"]))
+	|> should.equal(expected_error)
 }
 
 pub fn string_min_length_test() {
@@ -121,8 +140,10 @@ pub fn string_min_length_test() {
 
 	let thing_two = Thing("Tw")
 
+	let expected_error = Error(tuple("Less than 3", ["Less than 3"]))
+
 	validator(thing_two)
-	|> should.equal(Error(["Less than 3"]))
+	|> should.equal(expected_error)
 }
 
 pub fn string_max_length_test() {
@@ -138,6 +159,8 @@ pub fn string_max_length_test() {
 
 	let thing_two = Thing("Two and Three")
 
+	let expected_error = Error(tuple("More than 5", ["More than 5"]))
+
 	validator(thing_two)
-	|> should.equal(Error(["More than 5"]))
+	|> should.equal(expected_error)
 }

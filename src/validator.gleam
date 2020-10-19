@@ -1,29 +1,41 @@
 import gleam/list
 import gleam/result
-import validator/common
+import validator/common.{Errors}
+
+pub type ValidatorResult(a, e) =
+	common.ValidatorResult(a, e)
 
 pub fn validate(
-	accumulator: Result(fn(b) -> next_accumulator, List(e)),
+	accumulator: Result(fn(b) -> next_accumulator, Errors(e)),
 	value: a,
-	validator: fn(a) -> Result(b, List(e)),
-) -> Result(next_accumulator, List(e)) {
+	validator: fn(a) -> Result(b, Errors(e)),
+) -> Result(next_accumulator, Errors(e)) {
+
 	case validator(value) {
 		Ok(value) ->
 			accumulator
 			|> result.map(fn(acc) { acc(value) })
 
-		Error(errors) ->
+		Error(tuple(e, errors)) ->
 			case accumulator {
-				Ok(_) -> Error(errors)
-				Error(previous_errors) -> Error(list.flatten([previous_errors, errors]))
+				Ok(_) ->
+					Error(tuple(e, errors))
+
+				Error(tuple(first_error, previous_errors)) ->
+					Error(
+						tuple(
+							first_error,
+							list.flatten([previous_errors, errors]),
+						)
+					)
 			}
 	}
 }
 
 pub fn keep(
-	accumulator: Result(fn(value) -> next_accumulator, List(e)),
+	accumulator: Result(fn(value) -> next_accumulator, Errors(e)),
 	value: value,
-) -> Result(next_accumulator, List(e)) {
+) -> Result(next_accumulator, Errors(e)) {
 	case accumulator {
 		Error(errors) -> Error(errors)
 		Ok(acc) -> Ok(acc(value))
