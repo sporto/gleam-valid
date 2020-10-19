@@ -4,15 +4,23 @@ import validator/string as v_string
 import gleam/should
 import gleam/option.{None, Option, Some}
 
-type DirtyUser {
-	DirtyUser(name: Option(String), email: Option(String), age: Int)
+type InputUser {
+	InputUser(name: Option(String), email: Option(String), age: Int)
 }
 
 type ValidUser {
 	ValidUser(name: String, email: String, age: Int)
 }
 
-fn user_validator(user: DirtyUser) -> Result(ValidUser, List(String)) {
+type Thing {
+	Thing(name: String)
+}
+
+type Error {
+	ErrorEmpty
+}
+
+fn user_validator(user: InputUser) -> Result(ValidUser, List(String)) {
 	validator.begin3(ValidUser)
 	|> validator.validate(user.name, v_option.is_some("Please provide a name"))
 	|> validator.validate(user.email, v_option.is_some("Please provide an email"))
@@ -20,14 +28,14 @@ fn user_validator(user: DirtyUser) -> Result(ValidUser, List(String)) {
 }
 
 pub fn invalid_test() {
-	let invalid = DirtyUser(name: None, email: None, age: 0)
+	let invalid = InputUser(name: None, email: None, age: 0)
 
 	user_validator(invalid)
 	|> should.equal(Error(["Please provide a name", "Please provide an email"]))
 }
 
 pub fn valid_test() {
-	let valid_input = DirtyUser(
+	let valid_input = InputUser(
 		name: Some("Sam"),
 		email: Some("sam@sample.com"),
 		age: 11
@@ -43,8 +51,16 @@ pub fn valid_test() {
 	|> should.equal(Ok(valid))
 }
 
-type Thing {
-	Thing(name: String)
+pub fn error_type_test() {
+	let validator = fn(thing: Thing) {
+		validator.begin1(Thing)
+		|> validator.validate(thing.name, v_string.is_not_empty(ErrorEmpty))
+	}
+
+	let thing = Thing("")
+
+	validator(thing)
+	|> should.equal(Error([ErrorEmpty]))
 }
 
 pub fn custom_validator_test() {
