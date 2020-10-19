@@ -14,7 +14,7 @@ type ValidUser { ValidUser(name: String, age: Int) }
 
 Then you create a validator like:
 
-```
+```rust
 import validator
 
 fn user_validator(user: UserInput) -> Result(ValidUser, List(String)) {
@@ -26,7 +26,7 @@ fn user_validator(user: UserInput) -> Result(ValidUser, List(String)) {
 
 And run it:
 
-```
+```rust
 case user_validator(input) {
   Ok(valid_user) -> ...
   Error(errors) -> ...
@@ -37,7 +37,7 @@ case user_validator(input) {
 
 Errors can be your own type e.g.
 
-```
+```rust
 type Error {
   ErrorEmptyName,
   ErrorTooYoung,
@@ -50,12 +50,15 @@ fn user_validator(user: UserInput) -> Result(ValidUser, List(String)) {
 }
 ```
 
+## Custom validator
+
+...
 
 ## Test
 
 ```sh
-# Build the project
 rebar3 compile
+rebar3 eunit
 ```
 
 ## TODO
@@ -68,8 +71,6 @@ rebar3 compile
 - number.min
 - number.max
 - string.is_email
-- string.min_length
-- string.max_length
 
 
 ## Installation
