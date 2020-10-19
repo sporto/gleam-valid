@@ -61,9 +61,32 @@ The `Ok` branch has the valid output.
 The `Error` branch has a tuple `tuple(error, List(error))`.
 The first value is the first error. The second value is a list with all errors (including the first).
 
-## Custom validator
+## Custom property validator
 
-...
+A property validator has two components:
+
+- The error to return
+- A function that transforms the property if successful (`fn(input) -> Option(output)`)
+
+Example:
+
+```
+fn bigger_than_10(num: Int) -> Option(num) {
+  case num > 10 {
+    True ->
+      Some(num)
+    False ->
+      None
+  }
+}
+
+let custom_validator = validator.custom_validator("Must be bigger than 10", bigger_than_10)
+
+let validator = fn(form: FormInput) {
+  validator.build1(ValidForm)
+  |> validator.validate(form.quantity, custom_validator)
+}
+```
 
 ## Test
 
