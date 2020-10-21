@@ -1,4 +1,4 @@
-import validator.{ValidatorResult}
+import validator.{ValidatorResult} as v
 import validator/option as v_option
 import validator/string as v_string
 import gleam/should
@@ -12,6 +12,10 @@ type ValidUser {
 	ValidUser(name: String, email: String, age: Int)
 }
 
+type InputThing {
+	InputThing(name: Option(String))
+}
+
 type Thing {
 	Thing(name: String)
 }
@@ -21,16 +25,16 @@ type Error {
 }
 
 fn user_validator(user: InputUser) -> ValidatorResult(ValidUser, String) {
-	validator.build3(ValidUser)
-	|> validator.validate(
+	v.build3(ValidUser)
+	|> v.validate(
 		user.name,
 		v_option.is_some("Please provide a name")
 	)
-	|> validator.validate(
+	|> v.validate(
 		user.email,
 		v_option.is_some("Please provide an email")
 	)
-	|> validator.keep(user.age)
+	|> v.keep(user.age)
 }
 
 pub fn invalid_test() {
@@ -66,8 +70,8 @@ pub fn valid_test() {
 
 pub fn error_type_test() {
 	let validator = fn(thing: Thing) {
-		validator.build1(Thing)
-		|> validator.validate(thing.name, v_string.is_not_empty(ErrorEmpty))
+		v.build1(Thing)
+		|> v.validate(thing.name, v_string.is_not_empty(ErrorEmpty))
 	}
 
 	let thing = Thing("")
@@ -88,11 +92,11 @@ pub fn custom_validator_test() {
 		}
 	}
 
-	let custom_validator = validator.custom_validator("Must be One", must_be_one)
+	let custom_validator = v.custom_validator("Must be One", must_be_one)
 
 	let validator = fn(thing: Thing) {
-		validator.build1(Thing)
-		|> validator.validate(thing.name, custom_validator)
+		v.build1(Thing)
+		|> v.validate(thing.name, custom_validator)
 	}
 
 	let thing_one = Thing("One")
@@ -108,10 +112,51 @@ pub fn custom_validator_test() {
 	|> should.equal(expected_error)
 }
 
+pub fn and_test() {
+	let name_validator = v_string.is_not_empty("Empty")
+		|> v.and(v_string.min_length("More", 6))
+		|> v.and(v_string.max_length("Less", 2))
+
+	let validator = fn(thing: Thing) {
+		v.build1(Thing)
+		|> v.validate(thing.name, name_validator)
+	}
+
+	let thing = Thing("One")
+
+	let expected_error = Error(
+		tuple("More", ["More"])
+	)
+
+	validator(thing)
+	|> should.equal(expected_error)
+}
+
+pub fn and_with_transformation_test() {
+	let name_validator = v_option.is_some("Is null")
+		|> v.and(v_string.is_not_empty("Empty"))
+		|> v.and(v_string.min_length("More", 3))
+		|> v.and(v_string.max_length("Less", 8))
+
+	let validator = fn(thing: InputThing) {
+		v.build1(Thing)
+		|> v.validate(thing.name, name_validator)
+	}
+
+	let thing = InputThing(Some("One Thing"))
+
+	let expected_error = Error(
+		tuple("Less", ["Less"])
+	)
+
+	validator(thing)
+	|> should.equal(expected_error)
+}
+
 pub fn string_not_empty_test() {
 	let validator = fn(thing: Thing) {
-		validator.build1(Thing)
-		|> validator.validate(thing.name, v_string.is_not_empty("Empty"))
+		v.build1(Thing)
+		|> v.validate(thing.name, v_string.is_not_empty("Empty"))
 	}
 
 	let thing_one = Thing("One")
@@ -129,8 +174,8 @@ pub fn string_not_empty_test() {
 
 pub fn string_min_length_test() {
 	let validator = fn(thing: Thing) {
-		validator.build1(Thing)
-		|> validator.validate(thing.name, v_string.min_length("Less than 3", 3))
+		v.build1(Thing)
+		|> v.validate(thing.name, v_string.min_length("Less than 3", 3))
 	}
 
 	let thing_one = Thing("One")
@@ -148,8 +193,8 @@ pub fn string_min_length_test() {
 
 pub fn string_max_length_test() {
 	let validator = fn(thing: Thing) {
-		validator.build1(Thing)
-		|> validator.validate(thing.name, v_string.max_length("More than 5", 5))
+		v.build1(Thing)
+		|> v.validate(thing.name, v_string.max_length("More than 5", 5))
 	}
 
 	let thing_one = Thing("One")

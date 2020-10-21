@@ -5,47 +5,6 @@ import validator/common.{Errors}
 pub type ValidatorResult(a, e) =
 	common.ValidatorResult(a, e)
 
-pub fn validate(
-	accumulator: Result(fn(b) -> next_accumulator, Errors(e)),
-	value: a,
-	validator: fn(a) -> Result(b, Errors(e)),
-) -> Result(next_accumulator, Errors(e)) {
-
-	case validator(value) {
-		Ok(value) ->
-			accumulator
-			|> result.map(fn(acc) { acc(value) })
-
-		Error(tuple(e, errors)) ->
-			case accumulator {
-				Ok(_) ->
-					Error(tuple(e, errors))
-
-				Error(tuple(first_error, previous_errors)) ->
-					Error(
-						tuple(
-							first_error,
-							list.flatten([previous_errors, errors]),
-						)
-					)
-			}
-	}
-}
-
-pub fn keep(
-	accumulator: Result(fn(value) -> next_accumulator, Errors(e)),
-	value: value,
-) -> Result(next_accumulator, Errors(e)) {
-	case accumulator {
-		Error(errors) -> Error(errors)
-		Ok(acc) -> Ok(acc(value))
-	}
-}
-
-pub fn custom_validator(error, check) {
-	common.custom_validator(error, check)
-}
-
 fn curry2(constructor: fn(a, b) -> value) {
 	fn(a) { fn(b) { constructor(a, b) } }
 }
@@ -92,4 +51,58 @@ pub fn build5(constructor) {
 
 pub fn build6(constructor) {
 	Ok(curry6(constructor))
+}
+
+pub fn validate(
+	accumulator: Result(fn(b) -> next_accumulator, Errors(e)),
+	value: a,
+	validator: fn(a) -> Result(b, Errors(e)),
+) -> Result(next_accumulator, Errors(e)) {
+
+	case validator(value) {
+		Ok(value) ->
+			accumulator
+			|> result.map(fn(acc) { acc(value) })
+
+		Error(tuple(e, errors)) ->
+			case accumulator {
+				Ok(_) ->
+					Error(tuple(e, errors))
+
+				Error(tuple(first_error, previous_errors)) ->
+					Error(
+						tuple(
+							first_error,
+							list.flatten([previous_errors, errors]),
+						)
+					)
+			}
+	}
+}
+
+pub fn keep(
+	accumulator: Result(fn(value) -> next_accumulator, Errors(e)),
+	value: value,
+) -> Result(next_accumulator, Errors(e)) {
+	case accumulator {
+		Error(errors) -> Error(errors)
+		Ok(acc) -> Ok(acc(value))
+	}
+}
+
+pub fn custom_validator(error, check) {
+	common.custom_validator(error, check)
+}
+
+// Compose validators
+// This returns the first error (because the validators may transform the type)
+pub fn and(
+		validator1: common.Validator(i, mid, e),
+		validator2: common.Validator(mid, o, e)
+	) -> common.Validator(i, o, e) {
+
+		fn(input: i) {
+			validator1(input)
+				|> result.then(validator2)
+		}
 }

@@ -10,7 +10,8 @@ fn is_not_empty_check(value: String) -> Option(String) {
 }
 
 pub fn is_not_empty(error: e) {
-	common.custom_validator(error, is_not_empty_check)
+	common
+		.custom_validator(error, is_not_empty_check)
 }
 
 fn min_length_check(min: Int) {
@@ -25,7 +26,8 @@ fn min_length_check(min: Int) {
 }
 
 pub fn min_length(error: e, min: Int) {
-	common.custom_validator(error, min_length_check(min))
+	common
+		.custom_validator(error, min_length_check(min))
 }
 
 fn max_length_check(max: Int) {
@@ -40,5 +42,6 @@ fn max_length_check(max: Int) {
 }
 
 pub fn max_length(error: e, max: Int) {
-	common.custom_validator(error, max_length_check(max))
+	common
+		.custom_validator(error, max_length_check(max))
 }
