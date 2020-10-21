@@ -84,9 +84,12 @@ pub fn keep(
 	accumulator: Result(fn(value) -> next_accumulator, Errors(e)),
 	value: value,
 ) -> Result(next_accumulator, Errors(e)) {
+
 	case accumulator {
-		Error(errors) -> Error(errors)
-		Ok(acc) -> Ok(acc(value))
+		Error(errors) ->
+			Error(errors)
+		Ok(acc) ->
+			Ok(acc(value))
 	}
 }
 
