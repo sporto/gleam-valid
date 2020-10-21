@@ -80,11 +80,11 @@ fn bigger_than_10(num: Int) -> Option(num) {
   }
 }
 
-let custom_validator = validator.custom_validator("Must be bigger than 10", bigger_than_10)
+let custom = validator.custom("Must be bigger than 10", bigger_than_10)
 
 let validator = fn(form: FormInput) {
   validator.build1(ValidForm)
-  |> validator.validate(form.quantity, custom_validator)
+  |> validator.validate(form.quantity, custom)
 }
 ```
 

@@ -9,7 +9,7 @@ pub type ValidatorResult(a, e) =
 pub type Validator(input, output, e) =
 	fn(input) -> Result(output, Errors(e))
 
-pub fn custom_validator(
+pub fn custom(
 		error: e,
 		check: fn(input) -> Option(output)
 	) -> Validator(input, output, e) {

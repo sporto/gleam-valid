@@ -12,5 +12,5 @@ fn is_some_check(
 }
 
 pub fn is_some(error: e) {
-	common.custom_validator(error, is_some_check)
+	common.custom(error, is_some_check)
 }

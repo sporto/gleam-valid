@@ -82,7 +82,7 @@ pub fn error_type_test() {
 	|> should.equal(expected)
 }
 
-pub fn custom_validator_test() {
+pub fn custom_test() {
 	let must_be_one = fn(name: String) -> Option(String) {
 		case name == "One" {
 			True ->
@@ -92,11 +92,11 @@ pub fn custom_validator_test() {
 		}
 	}
 
-	let custom_validator = v.custom_validator("Must be One", must_be_one)
+	let custom = v.custom("Must be One", must_be_one)
 
 	let validator = fn(thing: Thing) {
 		v.build1(Thing)
-		|> v.validate(thing.name, custom_validator)
+		|> v.validate(thing.name, custom)
 	}
 
 	let thing_one = Thing("One")

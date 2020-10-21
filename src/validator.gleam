@@ -90,8 +90,8 @@ pub fn keep(
 	}
 }
 
-pub fn custom_validator(error, check) {
-	common.custom_validator(error, check)
+pub fn custom(error, check) {
+	common.custom(error, check)
 }
 
 // Compose validators
