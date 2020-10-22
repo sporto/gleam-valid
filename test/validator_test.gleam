@@ -1,7 +1,8 @@
-import validator.{ValidatorResult} as v
+import validator as v
 import validator/list as v_list
 import validator/option as v_option
 import validator/string as v_string
+import validator/common.{ValidatorResult}
 import gleam/should
 import gleam/list
 import gleam/option.{None, Option, Some}

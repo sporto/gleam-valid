@@ -1,15 +1,6 @@
 import gleam/list
 import gleam/result
-import validator/common
-
-pub type Errors(error) =
-	common.Errors(error)
-
-pub type ValidatorResult(output, error) =
-	common.ValidatorResult(output, error)
-
-pub type Validator(input, output, error) =
-	common.Validator(input, output, error)
+import validator/common.{Errors}
 
 fn curry2(constructor: fn(a, b) -> value) {
 	fn(a) { fn(b) { constructor(a, b) } }
