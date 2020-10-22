@@ -123,22 +123,26 @@ pub fn chain(
 
 	fn(input: io) -> Result(io, Errors(e)) {
 
-		// let folder = fn(validator, acc) {
-		// 	case validator(input) {
-	
-		// 		Error(tuple(e, errors)) ->
-		// 			case acc {
+		let results = validators
+			|> list.map(fn(validator) {
+				validator(input)
+			})
 
-		// 			}
-		// 	}
-		// 	acc
-		// }
+		let errors = results
+			|> list.map(fn(result) {
+				case result {
+					Ok(_) -> []
+					Error(tuple(first, rest)) -> rest
+				}
+			})
+			|> list.flatten
 
-		// list.fold(
-		// 	validators,
-		// 	Ok(input),
-		// 	folder
-		// )
+		case list.head(errors) {
+			Error(Nil) ->
+				Ok(input)
+			Ok(head) ->
+				Error(tuple(head, errors))
+		}
 	}
 
 }

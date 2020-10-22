@@ -153,6 +153,32 @@ pub fn and_with_transformation_test() {
 	|> should.equal(expected_error)
 }
 
+pub fn chain_test() {
+	let name_validator = v.chain(
+		[
+			v_string.is_not_empty("Empty"),
+			v_string.min_length(">=3", 3),
+			v_string.min_length(">=4", 4),
+			v_string.min_length(">=5", 5),
+			v_string.max_length("<=10", 10)
+		]
+	)
+
+	let validator = fn(thing: Thing) {
+		v.build1(Thing)
+		|> v.validate(thing.name, name_validator)
+	}
+
+	let thing = Thing("1")
+
+	let expected_error = Error(
+		tuple(">=3", [">=3", ">=4", ">=5"])
+	)
+
+	validator(thing)
+	|> should.equal(expected_error)
+}
+
 // Validators
 
 pub fn option_is_some_test() {
