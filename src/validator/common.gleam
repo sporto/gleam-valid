@@ -1,13 +1,15 @@
 import gleam/option.{None, Option, Some}
 
-pub type Errors(e) =
-	tuple(e, List(e))
+pub type Errors(error) =
+	tuple(error, List(error))
 
-pub type ValidatorResult(a, e) =
-	Result(a, Errors(e))
+pub type ValidatorResult(output, error) =
+	Result(output, Errors(error))
 
-pub type Validator(input, output, e) =
-	fn(input) -> Result(output, Errors(e))
+/// A Validator is a function that takes an input and
+/// returns a ValidatorResult
+pub type Validator(input, output, error) =
+	fn(input) -> ValidatorResult(output, error)
 
 pub fn custom(
 		error: e,

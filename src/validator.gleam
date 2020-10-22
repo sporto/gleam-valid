@@ -1,9 +1,15 @@
 import gleam/list
 import gleam/result
-import validator/common.{Errors}
+import validator/common
 
-pub type ValidatorResult(a, e) =
-	common.ValidatorResult(a, e)
+pub type Errors(error) =
+	common.Errors(error)
+
+pub type ValidatorResult(output, error) =
+	common.ValidatorResult(output, error)
+
+pub type Validator(input, output, error) =
+	common.Validator(input, output, error)
 
 fn curry2(constructor: fn(a, b) -> value) {
 	fn(a) { fn(b) { constructor(a, b) } }
@@ -100,6 +106,11 @@ pub fn custom(error, check) {
 /// Compose validators
 /// Return the first one and if successful then the second
 /// Only returns one error (because the validators may transform the type)
+///
+/// ## Example
+///
+///	  let name_validator = v_string.is_not_empty("Empty")
+///       |> v.and(v_string.min_length("More", 6))
 pub fn and(
 		validator1: common.Validator(i, mid, e),
 		validator2: common.Validator(mid, o, e)
