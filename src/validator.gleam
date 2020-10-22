@@ -111,13 +111,13 @@ pub fn and(
 		}
 }
 
-/// Chain validators
+/// Validate a value using a list of validators.
 /// This runs all the validators in the list.
 /// The initial input is passed to all validators.
 /// All these validators must have the same input and output types.
 /// Returns Ok when all validators pass.
 /// Returns Error when any validator fails. Error will have all failures.
-pub fn chain(
+pub fn all(
 		validators: List(common.Validator(io, io, e))
 	) -> common.Validator(io, io, e) {
 

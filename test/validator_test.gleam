@@ -153,8 +153,8 @@ pub fn and_with_transformation_test() {
 	|> should.equal(expected_error)
 }
 
-pub fn chain_test() {
-	let name_validator = v.chain(
+pub fn all_test() {
+	let name_validator = v.all(
 		[
 			v_string.is_not_empty("Empty"),
 			v_string.min_length(">=3", 3),
@@ -179,9 +179,9 @@ pub fn chain_test() {
 	|> should.equal(expected_error)
 }
 
-pub fn compose_and_chain_test() {
+pub fn compose_and_all_test() {
 	let name_validator = v_option.is_some("Is null")
-		|> v.and(v.chain(
+		|> v.and(v.all(
 				[
 					v_string.is_not_empty("Empty"),
 					v_string.min_length(">=3", 3),
