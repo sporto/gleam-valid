@@ -97,15 +97,11 @@ rebar3 eunit
 
 ## TODO
 
-- Compose
-- list.is_not_empty
 - list.min_length
 - list.max_length
 - list.every
 - number.min
 - number.max
-- string.is_email
-
 
 ## Installation
 
