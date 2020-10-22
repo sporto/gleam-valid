@@ -24,7 +24,6 @@ fn min_length_check(min: Int) {
 		case len < min {
 			True ->
 				None
-
 			False ->
 				Some(value)
 		}
@@ -42,7 +41,6 @@ fn max_length_check(max: Int) {
 		case len > max {
 			True ->
 				None
-
 			False ->
 				Some(value)
 		}

@@ -97,8 +97,9 @@ pub fn custom(error, check) {
 	common.custom(error, check)
 }
 
-// Compose validators
-// This returns the first error (because the validators may transform the type)
+/// Compose validators
+/// Return the first one and if successful then the second
+/// Only returns one error (because the validators may transform the type)
 pub fn and(
 		validator1: common.Validator(i, mid, e),
 		validator2: common.Validator(mid, o, e)
@@ -108,4 +109,36 @@ pub fn and(
 			validator1(input)
 				|> result.then(validator2)
 		}
+}
+
+/// Chain validators
+/// This runs all the validators in the list.
+/// The initial input is passed to all validators.
+/// All these validators must have the same input and output types.
+/// Returns Ok when all validators pass.
+/// Returns Error when any validator fails. Error will have all failures.
+pub fn chain(
+		validators: List(common.Validator(io, io, e))
+	) -> common.Validator(io, io, e) {
+
+	fn(input: io) -> Result(io, Errors(e)) {
+
+		// let folder = fn(validator, acc) {
+		// 	case validator(input) {
+	
+		// 		Error(tuple(e, errors)) ->
+		// 			case acc {
+
+		// 			}
+		// 	}
+		// 	acc
+		// }
+
+		// list.fold(
+		// 	validators,
+		// 	Ok(input),
+		// 	folder
+		// )
+	}
+
 }
