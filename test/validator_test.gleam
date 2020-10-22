@@ -1,4 +1,5 @@
 import validator.{ValidatorResult} as v
+import validator/list as v_list
 import validator/option as v_option
 import validator/string as v_string
 import gleam/should
@@ -252,5 +253,17 @@ pub fn string_max_length_test() {
 	let expected_error = Error(tuple("More than 5", ["More than 5"]))
 
 	validator("More than five")
+	|> should.equal(expected_error)
+}
+
+pub fn list_is_not_empty_test() {
+	let validator = v_list.is_not_empty("Empty")
+
+	validator([1])
+	|> should.equal(Ok([1]))
+
+	let expected_error = Error(tuple("Empty", ["Empty"]))
+
+	validator([])
 	|> should.equal(expected_error)
 }
