@@ -179,6 +179,32 @@ pub fn chain_test() {
 	|> should.equal(expected_error)
 }
 
+pub fn compose_and_chain_test() {
+	let name_validator = v_option.is_some("Is null")
+		|> v.and(v.chain(
+				[
+					v_string.is_not_empty("Empty"),
+					v_string.min_length(">=3", 3),
+					v_string.max_length("<=10", 10)
+				]
+			)
+		)
+
+	let validator = fn(thing: InputThing) {
+		v.build1(Thing)
+		|> v.validate(thing.name, name_validator)
+	}
+
+	let thing = InputThing(Some("One Thing after the other"))
+
+	let expected_error = Error(
+		tuple("<=10", ["<=10"])
+	)
+
+	validator(thing)
+	|> should.equal(expected_error)
+}
+
 // Validators
 
 pub fn option_is_some_test() {
