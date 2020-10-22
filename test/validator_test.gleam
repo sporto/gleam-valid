@@ -153,59 +153,52 @@ pub fn and_with_transformation_test() {
 	|> should.equal(expected_error)
 }
 
+// Validators
+
+pub fn option_is_some_test() {
+	let validator = v_option.is_some("Null")
+
+	validator(Some("Hola"))
+	|> should.equal(Ok("Hola"))
+
+	let expected_error = Error(tuple("Null", ["Null"]))
+
+	validator(None)
+	|> should.equal(expected_error)
+}
+
 pub fn string_not_empty_test() {
-	let validator = fn(thing: Thing) {
-		v.build1(Thing)
-		|> v.validate(thing.name, v_string.is_not_empty("Empty"))
-	}
+	let validator = v_string.is_not_empty("Empty")
 
-	let thing_one = Thing("One")
-
-	validator(thing_one)
-	|> should.equal(Ok(Thing("One")))
-
-	let thing_two = Thing("")
+	validator("One")
+	|> should.equal(Ok("One"))
 
 	let expected_error = Error(tuple("Empty", ["Empty"]))
 
-	validator(thing_two)
+	validator("")
 	|> should.equal(expected_error)
 }
 
 pub fn string_min_length_test() {
-	let validator = fn(thing: Thing) {
-		v.build1(Thing)
-		|> v.validate(thing.name, v_string.min_length("Less than 3", 3))
-	}
+	let validator = v_string.min_length("Less than 3", 3)
 
-	let thing_one = Thing("One")
-
-	validator(thing_one)
-	|> should.equal(Ok(Thing("One")))
-
-	let thing_two = Thing("Tw")
+	validator("One")
+	|> should.equal(Ok("One"))
 
 	let expected_error = Error(tuple("Less than 3", ["Less than 3"]))
 
-	validator(thing_two)
+	validator("Tw")
 	|> should.equal(expected_error)
 }
 
 pub fn string_max_length_test() {
-	let validator = fn(thing: Thing) {
-		v.build1(Thing)
-		|> v.validate(thing.name, v_string.max_length("More than 5", 5))
-	}
+	let validator = v_string.max_length("More than 5", 5)
 
-	let thing_one = Thing("One")
-
-	validator(thing_one)
-	|> should.equal(Ok(Thing("One")))
-
-	let thing_two = Thing("Two and Three")
+	validator("Hello")
+	|> should.equal(Ok("Hello"))
 
 	let expected_error = Error(tuple("More than 5", ["More than 5"]))
 
-	validator(thing_two)
+	validator("More than five")
 	|> should.equal(expected_error)
 }
