@@ -1,5 +1,6 @@
 import gleam/option.{None, Option, Some}
 import gleam/string
+import gleam/regex
 import validator/common
 
 fn is_not_empty_check(value: String) -> Option(String) {
@@ -15,6 +16,22 @@ fn is_not_empty_check(value: String) -> Option(String) {
 
 pub fn is_not_empty(error: e) {
 	common.custom(error, is_not_empty_check)
+}
+
+fn is_email_check(value: String) -> Option(String) {
+	assert Ok(re) = regex.from_string("^[\\w\\d]+@[\\w\\d\\.]+$")
+
+	case regex.check(with: re, content: value) {
+		True ->
+			Some(value)
+
+		False ->
+			None
+	}
+}
+
+pub fn is_email(error: e) {
+	common.custom(error, is_email_check)
 }
 
 fn min_length_check(min: Int) {

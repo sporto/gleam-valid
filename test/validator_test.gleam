@@ -3,6 +3,7 @@ import validator/list as v_list
 import validator/option as v_option
 import validator/string as v_string
 import gleam/should
+import gleam/list
 import gleam/option.{None, Option, Some}
 
 type InputUser {
@@ -230,6 +231,32 @@ pub fn string_not_empty_test() {
 
 	validator("")
 	|> should.equal(expected_error)
+}
+
+pub fn string_is_email_test() {
+	let validator = v_string.is_email("Not email")
+
+	[
+		"a@b",
+		"a1@b",
+		"a1@b.com",
+		"a1@b.com.au",
+	] |> list.map(fn(email) {
+		validator(email)
+		|> should.equal(Ok(email))
+	})
+
+	let expected_error = Error(tuple("Not email", ["Not email"]))
+
+	[
+		"",
+		"a",
+		"a@",
+		"@b",
+	] |> list.map(fn(email) {
+		validator(email)
+		|> should.equal(expected_error)
+	})
 }
 
 pub fn string_min_length_test() {
