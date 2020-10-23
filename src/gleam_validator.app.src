@@ -1,5 +1,5 @@
-{application, validator,
- [{description, "A Gleam program"},
+{application, gleam_validator,
+ [{description, "A Gleam validator"},
   {vsn, "1.0.0"},
   {registered, []},
   {applications,

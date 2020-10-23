@@ -6,3 +6,6 @@ docs:
 
 docs-preview:
 	sfz -r ./gen/docs/
+
+publish:
+	rebar3 hex publish
