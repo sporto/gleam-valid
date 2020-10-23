@@ -8,6 +8,8 @@ API Docs: <https://hexdocs.pm/gleam_validator>.
 
 This library follows the principle [Parse don't validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/).
 
+## Usage
+
 You start with an input type and validate into an output type. These two types can be different. For example:
 
 ```haskell
@@ -71,6 +73,10 @@ The `Ok` branch has the valid output.
 The `Error` branch has a tuple `tuple(error, List(error))`.
 The first value is the first error. The second value is a list with all errors (including the first).
 
+## Validators
+
+See the [API Docs](https://hexdocs.pm/gleam_validator/) for the list of included validators.
+
 ## Custom property validator
 
 A property validator has two components:
@@ -81,6 +87,9 @@ A property validator has two components:
 Example:
 
 ```rust
+import gleam/option.{None, Option, Some}
+import validator
+
 fn bigger_than_10(num: Int) -> Option(num) {
   case num > 10 {
     True ->
