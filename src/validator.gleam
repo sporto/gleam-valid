@@ -77,6 +77,7 @@ pub fn validate(
 	}
 }
 
+/// Keep a value
 pub fn keep(
 	accumulator: Result(fn(value) -> next_accumulator, Errors(e)),
 	value: value,

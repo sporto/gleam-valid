@@ -312,6 +312,23 @@ pub fn option_is_some_test() {
 	|> should.equal(expected_error)
 }
 
+pub fn option_optional_test() {
+	let validator = v_option.optional(
+		v_string.min_length("Short", 3)
+	)
+
+	validator(None)
+	|> should.equal(Ok(None))
+
+	validator(Some("abc"))
+	|> should.equal(Ok(Some("abc")))
+
+	let expected_error = Error(tuple("Short", ["Short"]))
+
+	validator(Some("a"))
+	|> should.equal(expected_error)
+}
+
 pub fn string_not_empty_test() {
 	let validator = v_string.is_not_empty("Empty")
 

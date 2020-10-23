@@ -95,11 +95,6 @@ rebar3 compile
 rebar3 eunit
 ```
 
-## TODO
-
-- number.min
-- number.max
-
 ## Installation
 
 If [available in Hex](https://www.rebar3.org/docs/dependencies#section-declaring-dependencies)
