@@ -98,6 +98,10 @@ let validator = fn(form: FormInput) {
 }
 ```
 
+## Examples
+
+See [the tests](https://github.com/sporto/gleam-validator/blob/main/test/validator_test.gleam) for many examples
+
 ## Test
 
 ```sh
