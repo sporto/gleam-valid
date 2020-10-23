@@ -7,7 +7,7 @@ This library follows the principle [Parse don't validate](https://lexi-lambda.gi
 You start with an input type and validate into an output type. These two types can be different. For example:
 
 ```haskell
-type InputUser { InputUser(name: Option(String), age: Int) }
+type UserInput { UserInput(name: Option(String), age: Int) }
 
 type ValidUser { ValidUser(name: String, age: Int) }
 ```
