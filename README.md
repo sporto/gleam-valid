@@ -1,6 +1,6 @@
-# validator
+# Validator
 
-A validation library for Gleam.
+A validation library for [Gleam](https://gleam.run/).
 
 This library follows the principle [Parse don't validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/).
 
