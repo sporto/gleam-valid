@@ -86,6 +86,15 @@ pub fn build6(constructor) {
 	Ok(curry6(constructor))
 }
 
+/// Validate an attribute.
+///
+/// ## Example
+///
+///	let validator = fn(person: Person) {
+///		v.build1(Person)
+///		|> v.validate(person.name, v_string.is_not_empty(ErrorEmpty))
+///	}
+///
 pub fn validate(
 	accumulator: Result(fn(b) -> next_accumulator, Errors(e)),
 	value: a,
@@ -115,7 +124,7 @@ pub fn validate(
 
 /// Keep a value as is.
 ///
-///	## Example
+/// ## Example
 ///
 ///	fn person_validor(person: Person) {
 ///		v.build2(Person)
@@ -232,6 +241,30 @@ pub fn all(
 	}
 }
 
+/// Validate a structure as a whole.
+///
+/// Sometimes we need to validate a property in relation to another.
+///
+/// This function requires a check function like:
+///
+///	fn(a) -> Result(a, error)
+///
+/// ## Example
+///
+///	let strengh_and_level_validator = fn(c: Character) {
+///		case c.level > c.strength {
+///			True -> Error(error)
+///			False -> Ok(c)
+///		}
+///	}
+///
+///	let validator = fn(c: Character) {
+///		v.build2(Character)
+///		|> v.validate(c.level, v_int.min("Level must be more that zero", 1))
+///		|> v.validate(c.strength, v_int.min("Strength must be more that zero", 1))
+///		|> v.whole(strengh_and_level_validator)
+///	}
+///
 pub fn whole(validator: fn(whole) -> Result(whole, error)) {
 	fn(validation_result: ValidatorResult(whole, error)) {
 

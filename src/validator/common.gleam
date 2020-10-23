@@ -1,5 +1,9 @@
 import gleam/option.{None, Option, Some}
 
+/// Error type returned by the validator.
+///
+/// This is a tuple with the first error and a list of all errors.
+/// The list includes the first error.
 pub type Errors(error) =
 	tuple(error, List(error))
 
@@ -11,6 +15,7 @@ pub type ValidatorResult(output, error) =
 pub type Validator(input, output, error) =
 	fn(input) -> ValidatorResult(output, error)
 
+/// Create a custom validator, see documentation in root module
 pub fn custom(
 		error: e,
 		check: fn(input) -> Option(output)
