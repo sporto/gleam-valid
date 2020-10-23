@@ -1,6 +1,6 @@
 {application, gleam_validator,
  [{description, "A Gleam validator"},
-  {vsn, "1.0.0"},
+  {vsn, "0.1.0"},
   {registered, []},
   {applications,
    [kernel,
