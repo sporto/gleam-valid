@@ -23,6 +23,10 @@ type Thing {
 	Thing(name: String)
 }
 
+type ThingWithList {
+	ThingWithList(items: List(String))
+}
+
 type Error {
 	ErrorEmpty
 }
@@ -293,5 +297,30 @@ pub fn list_is_not_empty_test() {
 	let expected_error = Error(tuple("Empty", ["Empty"]))
 
 	validator([])
+	|> should.equal(expected_error)
+}
+
+pub fn list_all_test() {
+	let list_validator = v_list.every(
+		v_string.min_length("Short", 3)
+	)
+
+	let validator = fn(thing: ThingWithList) {
+		v.build1(ThingWithList)
+		|> v.validate(thing.items, list_validator)
+	}
+
+	let thing = ThingWithList(["One", "Two"])
+
+	validator(thing)
+	|> should.equal(Ok(thing))
+
+	let thing2 = ThingWithList(["One", "T", "A"])
+
+	let expected_error = Error(
+		tuple("Short", ["Short", "Short"])
+	)
+
+	validator(thing2)
 	|> should.equal(expected_error)
 }
