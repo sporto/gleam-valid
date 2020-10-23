@@ -15,12 +15,15 @@ type ValidUser { ValidUser(name: String, age: Int) }
 Then you create a validator like:
 
 ```rust
-import validator.{ValidatorResult}
+import validator
+import validator/common.{ValidatorResult}
+import validator/int
+import validator/option
 
 fn user_validator(user: UserInput) -> ValidatorResult(ValidUser, String) {
   validator.build2(ValidUser)
   |> validator.validate(user.name, option.is_some("Please provide a name"))
-  |> validator.validate(user.age, number.min(13, "Must be at least 13 years old"))
+  |> validator.validate(user.age, int.min(13, "Must be at least 13 years old"))
 }
 ```
 
