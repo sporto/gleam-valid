@@ -6,7 +6,7 @@ This library follows the principle [Parse don't validate](https://lexi-lambda.gi
 
 You start with an input type and validate into an output type. These two types can be different. For example:
 
-```
+```haskell
 type InputUser { InputUser(name: Option(String), age: Int) }
 
 type ValidUser { ValidUser(name: String, age: Int) }
@@ -14,7 +14,7 @@ type ValidUser { ValidUser(name: String, age: Int) }
 
 Then you create a validator like:
 
-```rust
+```haskell
 import validator
 import validator/common.{ValidatorResult}
 import validator/int
@@ -40,7 +40,7 @@ case user_validator(input) {
 
 Errors can be your own type e.g.
 
-```elixir
+```haskell
 import validator
 import validator/common.{ValidatorResult}
 import validator/int
