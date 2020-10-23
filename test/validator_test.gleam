@@ -1,4 +1,5 @@
 import validator as v
+import validator/int as v_int
 import validator/list as v_list
 import validator/option as v_option
 import validator/string as v_string
@@ -214,6 +215,91 @@ pub fn compose_and_all_test() {
 
 // Validators
 
+pub fn int_min_test() {
+	let validator = v_int.min(">=5", 5)
+
+	validator(5)
+	|> should.equal(Ok(5))
+
+	let expected_error = Error(tuple(">=5", [">=5"]))
+
+	validator(4)
+	|> should.equal(expected_error)
+}
+
+pub fn int_max_test() {
+	let validator = v_int.max("<=5", 5)
+
+	validator(5)
+	|> should.equal(Ok(5))
+
+	let expected_error = Error(tuple("<=5", ["<=5"]))
+
+	validator(6)
+	|> should.equal(expected_error)
+}
+
+pub fn list_is_not_empty_test() {
+	let validator = v_list.is_not_empty("Empty")
+
+	validator([1])
+	|> should.equal(Ok([1]))
+
+	let expected_error = Error(tuple("Empty", ["Empty"]))
+
+	validator([])
+	|> should.equal(expected_error)
+}
+
+pub fn list_min_length_test() {
+	let validator = v_list.min_length("Short", 3)
+
+	validator([1,2,3])
+	|> should.equal(Ok([1,2,3]))
+
+	let expected_error = Error(tuple("Short", ["Short"]))
+
+	validator([1,2])
+	|> should.equal(expected_error)
+}
+
+pub fn list_max_length_test() {
+	let validator = v_list.max_length("Long", 4)
+
+	validator([1,2,3])
+	|> should.equal(Ok([1,2,3]))
+
+	let expected_error = Error(tuple("Long", ["Long"]))
+
+	validator([1,2,3,4,5])
+	|> should.equal(expected_error)
+}
+
+pub fn list_all_test() {
+	let list_validator = v_list.every(
+		v_string.min_length("Short", 3)
+	)
+
+	let validator = fn(thing: ThingWithList) {
+		v.build1(ThingWithList)
+		|> v.validate(thing.items, list_validator)
+	}
+
+	let thing = ThingWithList(["One", "Two"])
+
+	validator(thing)
+	|> should.equal(Ok(thing))
+
+	let thing2 = ThingWithList(["One", "T", "A"])
+
+	let expected_error = Error(
+		tuple("Short", ["Short", "Short"])
+	)
+
+	validator(thing2)
+	|> should.equal(expected_error)
+}
+
 pub fn option_is_some_test() {
 	let validator = v_option.is_some("Null")
 
@@ -285,66 +371,5 @@ pub fn string_max_length_test() {
 	let expected_error = Error(tuple("More than 5", ["More than 5"]))
 
 	validator("More than five")
-	|> should.equal(expected_error)
-}
-
-pub fn list_is_not_empty_test() {
-	let validator = v_list.is_not_empty("Empty")
-
-	validator([1])
-	|> should.equal(Ok([1]))
-
-	let expected_error = Error(tuple("Empty", ["Empty"]))
-
-	validator([])
-	|> should.equal(expected_error)
-}
-
-pub fn list_min_length_test() {
-	let validator = v_list.min_length("Short", 3)
-
-	validator([1,2,3])
-	|> should.equal(Ok([1,2,3]))
-
-	let expected_error = Error(tuple("Short", ["Short"]))
-
-	validator([1,2])
-	|> should.equal(expected_error)
-}
-
-pub fn list_max_length_test() {
-	let validator = v_list.max_length("Long", 4)
-
-	validator([1,2,3])
-	|> should.equal(Ok([1,2,3]))
-
-	let expected_error = Error(tuple("Long", ["Long"]))
-
-	validator([1,2,3,4,5])
-	|> should.equal(expected_error)
-}
-
-pub fn list_all_test() {
-	let list_validator = v_list.every(
-		v_string.min_length("Short", 3)
-	)
-
-	let validator = fn(thing: ThingWithList) {
-		v.build1(ThingWithList)
-		|> v.validate(thing.items, list_validator)
-	}
-
-	let thing = ThingWithList(["One", "Two"])
-
-	validator(thing)
-	|> should.equal(Ok(thing))
-
-	let thing2 = ThingWithList(["One", "T", "A"])
-
-	let expected_error = Error(
-		tuple("Short", ["Short", "Short"])
-	)
-
-	validator(thing2)
 	|> should.equal(expected_error)
 }
