@@ -40,8 +40,11 @@ case user_validator(input) {
 
 Errors can be your own type e.g.
 
-```rust
-import validator.{ValidatorResult}
+```elixir
+import validator
+import validator/common.{ValidatorResult}
+import validator/int
+import validator/option
 
 type Error {
   ErrorEmptyName,
@@ -51,7 +54,7 @@ type Error {
 fn user_validator(user: UserInput) -> ValidatorResult(ValidUser, String) {
   validator.build2(ValidUser)
   |> validator.validate(user.name, option.is_some(ErrorEmptyName))
-  |> validator.validate(user.age, number.min(13, ErrorTooYoung))
+  |> validator.validate(user.age, int.min(13, ErrorTooYoung))
 }
 ```
 
@@ -73,7 +76,7 @@ A property validator has two components:
 
 Example:
 
-```
+```rust
 fn bigger_than_10(num: Int) -> Option(num) {
   case num > 10 {
     True ->
