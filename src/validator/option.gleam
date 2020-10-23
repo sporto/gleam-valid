@@ -11,13 +11,39 @@ fn is_some_check(
 	}
 }
 
+/// Validate that a value is not None.
+/// Returns the value if Some.
+///
+/// ## Example
+///
+///	type PersonInput { PersonInput(name: Option(String)) }
+///
+///	type PersonValid { PersonValid(name: String) }
+///
+///	let validator = fn(person) {
+///		v.build1(PersonValid)
+///		|> v.validate(person.name, option.is_some("Name is null"))
+///	}
+///
 pub fn is_some(error: e) -> Validator(Option(i),i,e) {
 	common.custom(error, is_some_check)
 }
 
-/// Validate an optional value
-/// Run the validator only if the value is Some
-/// If None returns Ok(None)
+/// Validate an optional value.
+///
+/// Run the validator only if the value is Some.
+/// If the value is None then just return None back.
+///
+/// ## Example
+///
+///	let validator = fn(person) {
+///		v.build1(PersonValid)
+///		|> v.validate(
+///			person.name,
+///			option.optional(string.min_length("Short", 3))
+///		)
+///	}
+///
 pub fn optional(
 		validator: Validator(input, input, error)
 	) {

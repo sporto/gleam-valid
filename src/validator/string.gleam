@@ -17,10 +17,12 @@ fn is_not_empty_check(value: String) -> Option(String) {
 	}
 }
 
+/// Validate if a string is not empty
 pub fn is_not_empty(error: e) {
 	common.custom(error, is_not_empty_check)
 }
 
+/// Validate if a string parses to an Int. Returns the Int if so.
 pub fn is_int(error: e) {
 	common.custom(
 		error,
@@ -28,6 +30,7 @@ pub fn is_int(error: e) {
 	)
 }
 
+/// Validate if a string parses to an Float. Returns the Float if so.
 pub fn is_float(error: e) {
 	common.custom(
 		error,
@@ -47,6 +50,9 @@ fn is_email_check(value: String) -> Option(String) {
 	}
 }
 
+/// Validate if a string is an email.
+///
+/// This checks if a string follows a simple pattern `_@_`.
 pub fn is_email(error: e) {
 	common.custom(error, is_email_check)
 }
@@ -64,6 +70,7 @@ fn min_length_check(min: Int) {
 	}
 }
 
+/// Validate the min length of a string
 pub fn min_length(error: e, min: Int) {
 	common.custom(error, min_length_check(min))
 }
@@ -81,6 +88,7 @@ fn max_length_check(max: Int) {
 	}
 }
 
+/// Validate the max length of a string
 pub fn max_length(error: e, max: Int) {
 	common.custom(error, max_length_check(max))
 }
