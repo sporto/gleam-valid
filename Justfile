@@ -11,4 +11,4 @@ publish:
 	rebar3 hex publish
 
 docs-publish:
-	gleam docs publish
+	gleam docs publish --version 0.2.0 .
