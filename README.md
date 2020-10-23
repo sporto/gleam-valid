@@ -103,11 +103,10 @@ rebar3 eunit
 
 ## Installation
 
-If [available in Hex](https://www.rebar3.org/docs/dependencies#section-declaring-dependencies)
-this package can be installed by adding `validator` to your `rebar.config` dependencies:
+This package can be installed by adding `gleam_validator` to your `rebar.config` dependencies:
 
 ```erlang
 {deps, [
-    validator
+    gleam_validator
 ]}.
 ```
