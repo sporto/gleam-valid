@@ -300,6 +300,30 @@ pub fn list_is_not_empty_test() {
 	|> should.equal(expected_error)
 }
 
+pub fn list_min_length_test() {
+	let validator = v_list.min_length("Short", 3)
+
+	validator([1,2,3])
+	|> should.equal(Ok([1,2,3]))
+
+	let expected_error = Error(tuple("Short", ["Short"]))
+
+	validator([1,2])
+	|> should.equal(expected_error)
+}
+
+pub fn list_max_length_test() {
+	let validator = v_list.max_length("Long", 4)
+
+	validator([1,2,3])
+	|> should.equal(Ok([1,2,3]))
+
+	let expected_error = Error(tuple("Long", ["Long"]))
+
+	validator([1,2,3,4,5])
+	|> should.equal(expected_error)
+}
+
 pub fn list_all_test() {
 	let list_validator = v_list.every(
 		v_string.min_length("Short", 3)

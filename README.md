@@ -97,9 +97,6 @@ rebar3 eunit
 
 ## TODO
 
-- list.min_length
-- list.max_length
-- list.every
 - number.min
 - number.max
 

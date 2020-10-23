@@ -17,6 +17,43 @@ pub fn is_not_empty(error: error) {
 	common.custom(error, is_not_empty_check)
 }
 
+fn min_length_check(min: Int) {
+	fn(value: List(a)) -> Option(List(a)) {
+
+		case list.length(value) < min {
+			True ->
+				None
+
+			False ->
+				Some(value)
+		}
+	}
+}
+
+pub fn min_length(error: error, min: Int) {
+	common.custom(error, min_length_check(min))
+}
+
+fn max_length_check(max: Int) {
+	fn(value: List(a)) -> Option(List(a)) {
+
+		case list.length(value) > max {
+			True ->
+				None
+
+			False ->
+				Some(value)
+		}
+	}
+}
+
+pub fn max_length(error: error, max: Int) {
+	common.custom(error, max_length_check(max))
+}
+
+/// Validate a list of items.
+/// Run the given validator for each item.
+/// Returns all the errors.
 pub fn every(
 		validator: Validator(input, output, error)
 	) {
