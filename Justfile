@@ -9,3 +9,6 @@ docs-preview:
 
 publish:
 	rebar3 hex publish
+
+docs-publish:
+	gleam docs publish
