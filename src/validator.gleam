@@ -113,7 +113,16 @@ pub fn validate(
 	}
 }
 
-/// Keep a value
+/// Keep a value as is.
+///
+///	## Example
+///
+///	fn person_validor(person: Person) {
+///		v.build2(Person)
+///			|> v.validate(person.name, ...)
+///			|> v.keep(person.age)
+///	}
+///
 pub fn keep(
 	accumulator: Result(fn(value) -> next_accumulator, Errors(e)),
 	value: value,
@@ -127,6 +136,28 @@ pub fn keep(
 	}
 }
 
+/// Create a custom validator
+///
+/// A custom validator has two attributes:
+///
+/// - The error
+/// - A check function
+///
+/// The check function is a function that takes an `input` and returns `Option(output)`
+///
+/// ## Example
+///
+///	let must_be_sam = fn(name: String) -> Option(String) {
+///		case name == "Sam" {
+///			True -> Some(name)
+///			False -> None
+///		}
+///	}
+///
+///	let validator = fn(person: Person) {
+///		v.build1(Person)
+///		|> v.validate(person.name, v.custom("Not Sam", must_be_sam))
+///	}
 pub fn custom(error, check) {
 	common.custom(error, check)
 }
