@@ -28,6 +28,13 @@ type ThingWithList {
 	ThingWithList(items: List(String))
 }
 
+type Character {
+	Character(
+		level: Int,
+		strength: Int,
+	)
+}
+
 type Error {
 	ErrorEmpty
 }
@@ -211,6 +218,36 @@ pub fn compose_and_all_test() {
 
 	validator(thing)
 	|> should.equal(expected_error)
+}
+
+pub fn whole_test() {
+	let error = "Strength cannot be less than level"
+
+	let whole_validator = fn(c: Character) {
+		case c.level > c.strength {
+			True ->
+				Error(error)
+			False ->
+				Ok(c)
+		}
+	}
+
+	let validator = fn(c: Character) {
+		v.build2(Character)
+			|> v.validate(c.level, v_int.min("Level must be more that zero", 1))
+			|> v.validate(c.strength, v_int.min("Strength must be more that zero", 1))
+			|> v.whole(whole_validator)
+	}
+
+	let char = Character(level: 1, strength: 1)
+
+	validator(char)
+	|> should.equal(Ok(char))
+
+	let char2 = Character(level: 2, strength: 1)
+
+	validator(char2)
+	|> should.equal(Error(tuple(error, [error])))
 }
 
 // Validators

@@ -147,5 +147,16 @@ pub fn all(
 				Error(tuple(head, errors))
 		}
 	}
+}
 
+pub fn whole(validator) {
+	fn(validation_result) {
+		validation_result
+		|> result.then(fn(validated) {
+			validator(validated)
+				|> result.map_error(fn(error) {
+					tuple(error, [error])
+				})
+		})
+	}
 }
