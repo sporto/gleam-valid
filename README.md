@@ -1,6 +1,6 @@
 # Validator
 
-![CI](https://github.com/sporto/gleam-validator/workflows/CI/badge.svg?branch=main)
+![CI](https://github.com/sporto/gleam-validator/workflows/test/badge.svg?branch=main)
 
 A validation library for [Gleam](https://gleam.run/).
 
