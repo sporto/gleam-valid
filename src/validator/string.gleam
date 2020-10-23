@@ -1,6 +1,9 @@
 import gleam/option.{None, Option, Some}
-import gleam/string
+import gleam/float
+import gleam/function
+import gleam/int
 import gleam/regex
+import gleam/string
 import validator/common
 
 fn is_not_empty_check(value: String) -> Option(String) {
@@ -16,6 +19,20 @@ fn is_not_empty_check(value: String) -> Option(String) {
 
 pub fn is_not_empty(error: e) {
 	common.custom(error, is_not_empty_check)
+}
+
+pub fn is_int(error: e) {
+	common.custom(
+		error,
+		int.parse |> function.compose(option.from_result)
+	)
+}
+
+pub fn is_float(error: e) {
+	common.custom(
+		error,
+		float.parse |> function.compose(option.from_result)
+	)
 }
 
 fn is_email_check(value: String) -> Option(String) {

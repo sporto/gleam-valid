@@ -341,6 +341,30 @@ pub fn string_not_empty_test() {
 	|> should.equal(expected_error)
 }
 
+pub fn string_is_int_test() {
+	let validator = v_string.is_int("NaN")
+
+	validator("1")
+	|> should.equal(Ok(1))
+
+	let expected_error = Error(tuple("NaN", ["NaN"]))
+
+	validator("A")
+	|> should.equal(expected_error)
+}
+
+pub fn string_is_float_test() {
+	let validator = v_string.is_float("NaN")
+
+	validator("1.1")
+	|> should.equal(Ok(1.1))
+
+	let expected_error = Error(tuple("NaN", ["NaN"]))
+
+	validator("A")
+	|> should.equal(expected_error)
+}
+
 pub fn string_is_email_test() {
 	let validator = v_string.is_email("Not email")
 
