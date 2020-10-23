@@ -1,4 +1,5 @@
 import validator/common.{Validator}
+import gleam/function
 import gleam/list
 import gleam/option.{None, Option, Some}
 
@@ -88,9 +89,12 @@ pub fn every(
 			})
 			|> list.flatten
 
+		let ok_items = results
+			|> list.filter_map(function.identity)
+
 		case list.head(errors) {
 			Error(Nil) ->
-				Ok(items)
+				Ok(ok_items)
 			Ok(head) ->
 				Error(tuple(head, errors))
 		}

@@ -9,11 +9,19 @@ import gleam/list
 import gleam/option.{None, Option, Some}
 
 type InputUser {
-	InputUser(name: Option(String), email: Option(String), age: Int)
+	InputUser(
+		name: Option(String),
+		email: Option(String),
+		age: Int
+	)
 }
 
 type ValidUser {
-	ValidUser(name: String, email: String, age: Int)
+	ValidUser(
+		name: String,
+		email: String,
+		age: Int
+	)
 }
 
 type InputThing {
@@ -32,6 +40,20 @@ type Character {
 	Character(
 		level: Int,
 		strength: Int,
+	)
+}
+
+type InputCollection {
+	InputCollection(
+		thing: InputThing,
+		things: List(InputThing),
+	)
+}
+
+type ValidCollection {
+	ValidCollection (
+		thing: Thing,
+		things: List(Thing),
 	)
 }
 
@@ -449,5 +471,54 @@ pub fn string_max_length_test() {
 	let expected_error = Error(tuple("More than 5", ["More than 5"]))
 
 	validator("More than five")
+	|> should.equal(expected_error)
+}
+
+pub fn nested_test() {
+	let thing_validator = fn(thing: InputThing) {
+		v.build1(Thing)
+		|> v.validate(thing.name, v_option.is_some("Is null"))
+	}
+
+	let things_validator = v_list.every(thing_validator)
+
+	let validator = fn(col: InputCollection) {
+		v.build2(ValidCollection)
+		|> v.validate(col.thing, thing_validator)
+		|> v.validate(col.things, things_validator)
+	}
+
+	let input_col_1 = InputCollection(
+		thing: InputThing(name: Some("One")),
+		things: [
+			InputThing(name: Some("Two")),
+			InputThing(name: Some("Three")),
+		],
+	)
+
+	let valid_col1 = ValidCollection(
+		thing: Thing(name: "One"),
+		things: [
+			Thing(name: "Two"),
+			Thing(name: "Three"),
+		],
+	)
+
+	validator(input_col_1)
+	|> should.equal(Ok(valid_col1))
+
+	let input_col_2 = InputCollection(
+		thing: InputThing(name: Some("One")),
+		things: [
+			InputThing(name: None),
+			InputThing(name: Some("Three")),
+		],
+	)
+
+	let expected_error = Error(
+		tuple("Is null", ["Is null"])
+	)
+
+	validator(input_col_2)
 	|> should.equal(expected_error)
 }
