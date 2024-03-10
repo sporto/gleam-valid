@@ -1,14 +1,11 @@
-import gleam/option.{None, Option, Some}
-import validator/common.{Validator}
+import gleam/option.{type Option, None, Some}
+import validator/common.{type Validator}
 
-fn is_some_check(
-		maybe: Option(value),
-	) -> Option(value) {
-
-	case maybe {
-		None -> None
-		Some(value) -> Some(value)
-	}
+fn is_some_check(maybe: Option(value)) -> Option(value) {
+  case maybe {
+    None -> None
+    Some(value) -> Some(value)
+  }
 }
 
 /// Validate that a value is not None.
@@ -25,8 +22,8 @@ fn is_some_check(
 ///		|> v.validate(person.name, option.is_some("Name is null"))
 ///	}
 ///
-pub fn is_some(error: e) -> Validator(Option(i),i,e) {
-	common.custom(error, is_some_check)
+pub fn is_some(error: e) -> Validator(Option(i), i, e) {
+  common.custom(error, is_some_check)
 }
 
 /// Validate an optional value.
@@ -44,20 +41,16 @@ pub fn is_some(error: e) -> Validator(Option(i),i,e) {
 ///		)
 ///	}
 ///
-pub fn optional(
-		validator: Validator(input, input, error)
-	) {
+pub fn optional(validator: Validator(input, input, error)) {
+  fn(maybe: Option(input)) {
+    case maybe {
+      None -> Ok(maybe)
 
-	fn(maybe: Option(input)) {
-		case maybe {
-			None ->
-				Ok(maybe)
-
-			Some(value) ->
-				case validator(value) {
-					Ok(_) -> Ok(maybe)
-					Error(error) -> Error(error)
-				}
-		}
-	}
+      Some(value) ->
+        case validator(value) {
+          Ok(_) -> Ok(maybe)
+          Error(error) -> Error(error)
+        }
+    }
+  }
 }

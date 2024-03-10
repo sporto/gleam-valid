@@ -1,5 +1,5 @@
 test:
-	rebar3 eunit
+	gleam test
 
 docs:
 	gleam docs build
