@@ -8,7 +8,7 @@ docs-preview:
 	sfz -r ./gen/docs/
 
 publish:
-	rebar3 hex publish
+	gleam publish
 
 docs-publish:
 	gleam docs publish --version 0.2.0 .

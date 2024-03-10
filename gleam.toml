@@ -1,4 +1,4 @@
-name = "gleam_validator"
+name = "valid"
 version = "0.3.0"
 
 [dependencies]
