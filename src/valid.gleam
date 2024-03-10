@@ -1,6 +1,6 @@
 import gleam/list
 import gleam/result
-import validator/common.{type Errors, type ValidatorResult}
+import valid/common.{type Errors, type ValidatorResult}
 
 fn curry2(constructor: fn(a, b) -> value) {
   fn(a) { fn(b) { constructor(a, b) } }
@@ -214,7 +214,7 @@ pub fn all(
       |> list.map(fn(result) {
         case result {
           Ok(_) -> []
-          Error(#(first, rest)) -> rest
+          Error(#(_first, rest)) -> rest
         }
       })
       |> list.flatten

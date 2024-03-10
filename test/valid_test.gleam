@@ -1,9 +1,9 @@
-import validator as v
-import validator/int as v_int
-import validator/list as v_list
-import validator/option as v_option
-import validator/string as v_string
-import validator/common.{type ValidatorResult}
+import valid as v
+import valid/int as v_int
+import valid/list as v_list
+import valid/option as v_option
+import valid/string as v_string
+import valid/common.{type ValidatorResult}
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleeunit

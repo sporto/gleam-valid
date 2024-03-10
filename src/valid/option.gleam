@@ -1,5 +1,5 @@
 import gleam/option.{type Option, None, Some}
-import validator/common.{type Validator}
+import valid/common.{type Validator}
 
 fn is_some_check(maybe: Option(value)) -> Option(value) {
   case maybe {

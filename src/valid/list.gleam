@@ -1,4 +1,4 @@
-import validator/common.{type Validator}
+import valid/common.{type Validator}
 import gleam/function
 import gleam/list
 import gleam/option.{type Option, None, Some}
@@ -73,7 +73,7 @@ pub fn every(validator: Validator(input, output, error)) {
       |> list.map(fn(result) {
         case result {
           Ok(_) -> []
-          Error(#(first, rest)) -> rest
+          Error(#(_first, rest)) -> rest
         }
       })
       |> list.flatten

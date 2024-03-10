@@ -1,5 +1,5 @@
 import gleam/option.{type Option, None, Some}
-import validator/common
+import valid/common
 
 fn min_check(min: Int) {
   fn(value: Int) -> Option(Int) {

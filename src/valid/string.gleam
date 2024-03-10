@@ -3,7 +3,7 @@ import gleam/float
 import gleam/int
 import gleam/regex
 import gleam/string
-import validator/common
+import valid/common
 
 fn is_not_empty_check(value: String) -> Option(String) {
   case string.is_empty(value) {
