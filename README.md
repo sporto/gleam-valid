@@ -1,10 +1,10 @@
-# Validator
+# Valid
 
 ![CI](https://github.com/sporto/gleam-validator/workflows/test/badge.svg?branch=main)
 
 A validation library for [Gleam](https://gleam.run/).
 
-API Docs: <https://hexdocs.pm/gleam_validator>.
+API Docs: <https://hexdocs.pm/valid>.
 
 This library follows the principle [Parse don't validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/).
 
