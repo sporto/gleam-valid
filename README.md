@@ -8,6 +8,12 @@ API Docs: <https://hexdocs.pm/valid>.
 
 This library follows the principle [Parse don't validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/).
 
+## Install
+
+```
+gleam add valid
+```
+
 ## Usage
 
 You start with an input type and validate into an output type. These two types can be different. For example:
