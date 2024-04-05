@@ -115,7 +115,7 @@ let validator = fn(form: FormInput) {
 
 ## Examples
 
-See [the tests](https://github.com/sporto/gleam-validator/blob/main/test/validator_test.gleam) for many examples
+See [the tests](https://github.com/sporto/gleam-validator/blob/main/test/valid_test.gleam) for many examples
 
 ## Test
 
