@@ -136,12 +136,27 @@ pub fn validate(
   }
 }
 
+/// Validate an attribute required in a dictionary
+/// If you have a dictionary instead of a custom type, use this.
+///
+/// ## Example
+///
+///	let validator = fn(dictionary: Dict(String, String)) {
+///		valid.build1(Person)
+///		|> valid.required_in_dict(
+///     from: dictionary,
+///     get: "name",
+///     missing: "Missing name",
+///     validator: valid.string_is_not_empty(ErrorEmpty)
+///   )
+///	}
+///
 pub fn required_in_dict(
   accumulator: Result(fn(b) -> next_accumulator, Errors(e)),
-  input: Dict(String, a),
-  field: String,
-  access_error: e,
-  validator: fn(a) -> Result(b, Errors(e)),
+  from input: Dict(String, a),
+  get field: String,
+  missing access_error: e,
+  validator validator: fn(a) -> Result(b, Errors(e)),
 ) {
   let get = fn(input) {
     dict.get(input, field)

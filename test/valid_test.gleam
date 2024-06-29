@@ -123,10 +123,10 @@ fn user_dict_validator(
 ) -> ValidatorResult(ValidUser, String) {
   valid.build3(ValidUser)
   |> valid.required_in_dict(
-    input,
-    "name",
-    "Missing name",
-    valid.string_is_not_empty("Please provide a name"),
+    from: input,
+    get: "name",
+    missing: "Missing name",
+    validator: valid.string_is_not_empty("Please provide a name"),
   )
   |> valid.required_in_dict(
     input,
