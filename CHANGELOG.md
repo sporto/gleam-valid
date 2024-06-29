@@ -1,5 +1,22 @@
 # Changelog
 
+### 4.0.0
+
+### Added
+
+- Type `NonEmptyList`
+
+### Changed
+
+- Type `Check` signature, they should return a `Result(out, error)` now
+- Return errors as `NonEmptyList`
+- Validator now take the error as last argument
+
+### Removed
+
+- All `and_` functions, compose using `and` instead
+- Type `Error`, replaced with `NonEmptyList`
+
 ### 3.0.0
 
 ### Changed

@@ -118,10 +118,12 @@ fn user_validator(dictionary: Dict(String, String)) {
   |> valid.check(
     dictionary,
     valid.required_in_dict("name", "Missing name")
-      |> valid.and_string_is_not_empty("Please provide a name"),
+      |> valid.and(
+        valid.string_is_not_empty("Please provide a name")
+      ),
   )
   |> valid.check(
-    input,
+    dictionary,
     valid.optional_in_dict("age")
       |> valid.and_optional(valid.string_is_int("Please provide a valid number")),
   )
@@ -131,3 +133,10 @@ fn user_validator(dictionary: Dict(String, String)) {
 ## Examples
 
 See [the tests](https://github.com/sporto/gleam-valid/blob/main/test/valid_test.gleam) for many examples
+
+## TODO
+
+- Move readme examples to gleam code
+- Change `whole` to `check_discard`
+- Use NonEmpty
+- Pass the error to the check

@@ -62,15 +62,13 @@ fn user_validator(user: InputUser) -> ValidatorResult(ValidUser, String) {
 pub fn invalid_test() {
   let invalid = InputUser(name: None, email: None, age: 0, weight: None)
 
-  let expected =
+  let expected_error =
     Error(
-      #("Please provide a name", [
-        "Please provide a name", "Please provide an email",
-      ]),
+      valid.non_empty_new("Please provide a name", ["Please provide an email"]),
     )
 
   user_validator(invalid)
-  |> should.equal(expected)
+  |> should.equal(expected_error)
 }
 
 pub fn valid_test() {
@@ -97,21 +95,21 @@ pub fn error_type_test() {
 
   let thing = Thing("")
 
-  let expected = Error(#(ErrorEmpty, [ErrorEmpty]))
+  let expected_error = Error(valid.non_empty_new(ErrorEmpty, []))
 
   validator(thing)
-  |> should.equal(expected)
+  |> should.equal(expected_error)
 }
 
 pub fn custom_test() {
-  let must_be_one = fn(name: String) -> Option(String) {
+  let must_be_one = fn(name: String) -> Result(String, String) {
     case name == "One" {
-      True -> Some(name)
-      False -> None
+      True -> Ok(name)
+      False -> Error("Must be One")
     }
   }
 
-  let custom = valid.custom("Must be One", must_be_one)
+  let custom = valid.custom(must_be_one)
 
   let validator = fn(thing: Thing) {
     valid.build1(Thing)
@@ -125,7 +123,7 @@ pub fn custom_test() {
 
   let thing_two = Thing("Two")
 
-  let expected_error = Error(#("Must be One", ["Must be One"]))
+  let expected_error = Error(valid.non_empty_new("Must be One", []))
 
   validator(thing_two)
   |> should.equal(expected_error)
@@ -140,22 +138,24 @@ fn user_dict_validator(
   |> valid.check(
     input,
     valid.required_in_dict("name", "Missing name")
-      |> valid.and_string_is_not_empty("Please provide a name"),
+      |> valid.and(valid.string_is_not_empty("Please provide a name")),
   )
   |> valid.check(
     input,
     valid.required_in(get_email, "Missing Email")
-      |> valid.and_string_is_email("Please provide an email"),
+      |> valid.and(valid.string_is_email("Please provide an email")),
   )
   |> valid.check(
     input,
     valid.required_in_dict("age", "Missing age")
-      |> valid.and_string_is_int("Please provide an age"),
+      |> valid.and(valid.string_is_int("Please provide an age")),
   )
   |> valid.check(
     input,
     valid.optional_in_dict("weight")
-      |> valid.and_optional(valid.string_is_int("Please provide a valid number")),
+      |> valid.and(
+        valid.optional(valid.string_is_int("Please provide a valid number")),
+      ),
   )
 }
 
@@ -178,8 +178,8 @@ pub fn using_a_dictionary_test() {
 pub fn and_test() {
   let name_validator =
     valid.string_is_not_empty("Empty")
-    |> valid.and_string_min_length("More", 6)
-    |> valid.and_string_max_length("Less", 2)
+    |> valid.and(valid.string_min_length(6, "More"))
+    |> valid.and(valid.string_max_length(2, "Less"))
 
   let validator = fn(thing: Thing) {
     valid.build1(Thing)
@@ -188,7 +188,7 @@ pub fn and_test() {
 
   let thing = Thing("One")
 
-  let expected_error = Error(#("More", ["More"]))
+  let expected_error = Error(valid.non_empty_new("More", []))
 
   validator(thing)
   |> should.equal(expected_error)
@@ -198,8 +198,8 @@ pub fn and_with_transformation_test() {
   let name_validator =
     valid.is_some("Is null")
     |> valid.and(valid.string_is_not_empty("Empty"))
-    |> valid.and(valid.string_min_length("More", 3))
-    |> valid.and(valid.string_max_length("Less", 8))
+    |> valid.and(valid.string_min_length(3, "More"))
+    |> valid.and(valid.string_max_length(8, "Less"))
 
   let validator = fn(thing: InputThing) {
     valid.build1(Thing)
@@ -208,7 +208,7 @@ pub fn and_with_transformation_test() {
 
   let thing = InputThing(Some("One Thing"))
 
-  let expected_error = Error(#("Less", ["Less"]))
+  let expected_error = Error(valid.non_empty_new("Less", []))
 
   validator(thing)
   |> should.equal(expected_error)
@@ -218,10 +218,10 @@ pub fn all_test() {
   let name_validator =
     valid.all([
       valid.string_is_not_empty("Empty"),
-      valid.string_min_length(">=3", 3),
-      valid.string_min_length(">=4", 4),
-      valid.string_min_length(">=5", 5),
-      valid.string_max_length("<=10", 10),
+      valid.string_min_length(3, ">=3"),
+      valid.string_min_length(4, ">=4"),
+      valid.string_min_length(5, ">=5"),
+      valid.string_max_length(10, "<=10"),
     ])
 
   let validator = fn(thing: Thing) {
@@ -231,7 +231,7 @@ pub fn all_test() {
 
   let thing = Thing("1")
 
-  let expected_error = Error(#(">=3", [">=3", ">=4", ">=5"]))
+  let expected_error = Error(valid.non_empty_new(">=3", [">=4", ">=5"]))
 
   validator(thing)
   |> should.equal(expected_error)
@@ -243,8 +243,8 @@ pub fn compose_and_all_test() {
     |> valid.and(
       valid.all([
         valid.string_is_not_empty("Empty"),
-        valid.string_min_length(">=3", 3),
-        valid.string_max_length("<=10", 10),
+        valid.string_min_length(3, ">=3"),
+        valid.string_max_length(10, "<=10"),
       ]),
     )
 
@@ -255,7 +255,7 @@ pub fn compose_and_all_test() {
 
   let thing = InputThing(Some("One Thing after the other"))
 
-  let expected_error = Error(#("<=10", ["<=10"]))
+  let expected_error = Error(valid.non_empty_new("<=10", []))
 
   validator(thing)
   |> should.equal(expected_error)
@@ -276,17 +276,17 @@ pub fn whole_test() {
 
   let whole_validator = fn(c: Character) {
     case c.level > c.strength {
-      True -> Error(error)
+      True -> Error(valid.non_empty_new(error, []))
       False -> Ok(c)
     }
   }
 
   let validator = fn(c: Character) {
     valid.build2(Character)
-    |> valid.check(c.level, valid.int_min("Level must be more that zero", 1))
+    |> valid.check(c.level, valid.int_min(1, "Level must be more that zero"))
     |> valid.check(
       c.strength,
-      valid.int_min("Strength must be more that zero", 1),
+      valid.int_min(1, "Strength must be more that zero"),
     )
     |> valid.whole(whole_validator)
   }
@@ -299,30 +299,30 @@ pub fn whole_test() {
   let char2 = Character(level: 2, strength: 1)
 
   validator(char2)
-  |> should.equal(Error(#(error, [error])))
+  |> should.equal(Error(valid.non_empty_new(error, [])))
 }
 
 // Validators
 
 pub fn int_min_test() {
-  let validator = valid.int_min(">=5", 5)
+  let validator = valid.int_min(5, ">=5")
 
   validator(5)
   |> should.equal(Ok(5))
 
-  let expected_error = Error(#(">=5", [">=5"]))
+  let expected_error = Error(valid.non_empty_new(">=5", []))
 
   validator(4)
   |> should.equal(expected_error)
 }
 
 pub fn int_max_test() {
-  let validator = valid.int_max("<=5", 5)
+  let validator = valid.int_max(5, "<=5")
 
   validator(5)
   |> should.equal(Ok(5))
 
-  let expected_error = Error(#("<=5", ["<=5"]))
+  let expected_error = Error(valid.non_empty_new("<=5", []))
 
   validator(6)
   |> should.equal(expected_error)
@@ -334,38 +334,38 @@ pub fn list_is_not_empty_test() {
   validator([1])
   |> should.equal(Ok([1]))
 
-  let expected_error = Error(#("Empty", ["Empty"]))
+  let expected_error = Error(valid.non_empty_new("Empty", []))
 
   validator([])
   |> should.equal(expected_error)
 }
 
 pub fn list_min_length_test() {
-  let validator = valid.list_min_length("Short", 3)
+  let validator = valid.list_min_length(3, "Short")
 
   validator([1, 2, 3])
   |> should.equal(Ok([1, 2, 3]))
 
-  let expected_error = Error(#("Short", ["Short"]))
+  let expected_error = Error(valid.non_empty_new("Short", []))
 
   validator([1, 2])
   |> should.equal(expected_error)
 }
 
 pub fn list_max_length_test() {
-  let validator = valid.list_max_length("Long", 4)
+  let validator = valid.list_max_length(4, "Long")
 
   validator([1, 2, 3])
   |> should.equal(Ok([1, 2, 3]))
 
-  let expected_error = Error(#("Long", ["Long"]))
+  let expected_error = Error(valid.non_empty_new("Long", []))
 
   validator([1, 2, 3, 4, 5])
   |> should.equal(expected_error)
 }
 
 pub fn list_all_test() {
-  let list_validator = valid.list_every(valid.string_min_length("Short", 3))
+  let list_validator = valid.list_every(valid.string_min_length(3, "Short"))
 
   let validator = fn(thing: ThingWithList) {
     valid.build1(ThingWithList)
@@ -379,7 +379,7 @@ pub fn list_all_test() {
 
   let thing2 = ThingWithList(["One", "T", "A"])
 
-  let expected_error = Error(#("Short", ["Short", "Short"]))
+  let expected_error = Error(valid.non_empty_new("Short", ["Short"]))
 
   validator(thing2)
   |> should.equal(expected_error)
@@ -391,14 +391,14 @@ pub fn option_is_some_test() {
   validator(Some("Hola"))
   |> should.equal(Ok("Hola"))
 
-  let expected_error = Error(#("Null", ["Null"]))
+  let expected_error = Error(valid.non_empty_new("Null", []))
 
   validator(None)
   |> should.equal(expected_error)
 }
 
 pub fn optional_test() {
-  let validator = valid.optional(valid.string_min_length("Short", 3))
+  let validator = valid.optional(valid.string_min_length(3, "Short"))
 
   validator(None)
   |> should.equal(Ok(None))
@@ -406,7 +406,7 @@ pub fn optional_test() {
   validator(Some("abc"))
   |> should.equal(Ok(Some("abc")))
 
-  let expected_error = Error(#("Short", ["Short"]))
+  let expected_error = Error(valid.non_empty_new("Short", []))
 
   validator(Some("a"))
   |> should.equal(expected_error)
@@ -421,7 +421,7 @@ pub fn optional_different_type_test() {
   validator(Some("1"))
   |> should.equal(Ok(Some(1)))
 
-  let expected_error = Error(#("Not Int", ["Not Int"]))
+  let expected_error = Error(valid.non_empty_new("Not Int", []))
 
   validator(Some("a"))
   |> should.equal(expected_error)
@@ -451,7 +451,7 @@ pub fn required_in_test() {
   let validator = valid.required_in(function.identity, "Absent")
 
   validator(None)
-  |> should.equal(Error(#("Absent", ["Absent"])))
+  |> should.equal(Error(valid.non_empty_new("Absent", [])))
 
   validator(Some(1))
   |> should.equal(Ok(1))
@@ -461,7 +461,7 @@ pub fn required_in_dict_test() {
   let validator = valid.required_in_dict("name", "Absent")
 
   validator(dict.new())
-  |> should.equal(Error(#("Absent", ["Absent"])))
+  |> should.equal(Error(valid.non_empty_new("Absent", [])))
 
   validator([#("name", "sam")] |> dict.from_list)
   |> should.equal(Ok("sam"))
@@ -473,7 +473,7 @@ pub fn string_not_empty_test() {
   validator("One")
   |> should.equal(Ok("One"))
 
-  let expected_error = Error(#("Empty", ["Empty"]))
+  let expected_error = Error(valid.non_empty_new("Empty", []))
 
   validator("")
   |> should.equal(expected_error)
@@ -485,7 +485,7 @@ pub fn string_is_int_test() {
   validator("1")
   |> should.equal(Ok(1))
 
-  let expected_error = Error(#("NaN", ["NaN"]))
+  let expected_error = Error(valid.non_empty_new("NaN", []))
 
   validator("A")
   |> should.equal(expected_error)
@@ -497,7 +497,7 @@ pub fn string_is_float_test() {
   validator("1.1")
   |> should.equal(Ok(1.1))
 
-  let expected_error = Error(#("NaN", ["NaN"]))
+  let expected_error = Error(valid.non_empty_new("NaN", []))
 
   validator("A")
   |> should.equal(expected_error)
@@ -512,7 +512,7 @@ pub fn string_is_email_test() {
     |> should.equal(Ok(email))
   })
 
-  let expected_error = Error(#("Not email", ["Not email"]))
+  let expected_error = Error(valid.non_empty_new("Not email", []))
 
   ["", "a", "a@", "@b"]
   |> list.map(fn(email) {
@@ -522,24 +522,24 @@ pub fn string_is_email_test() {
 }
 
 pub fn string_min_length_test() {
-  let validator = valid.string_min_length("Less than 3", 3)
+  let validator = valid.string_min_length(3, "Less than 3")
 
   validator("One")
   |> should.equal(Ok("One"))
 
-  let expected_error = Error(#("Less than 3", ["Less than 3"]))
+  let expected_error = Error(valid.non_empty_new("Less than 3", []))
 
   validator("Tw")
   |> should.equal(expected_error)
 }
 
 pub fn string_max_length_test() {
-  let validator = valid.string_max_length("More than 5", 5)
+  let validator = valid.string_max_length(5, "More than 5")
 
   validator("Hello")
   |> should.equal(Ok("Hello"))
 
-  let expected_error = Error(#("More than 5", ["More than 5"]))
+  let expected_error = Error(valid.non_empty_new("More than 5", []))
 
   validator("More than five")
   |> should.equal(expected_error)
@@ -580,7 +580,7 @@ pub fn nested_test() {
       InputThing(name: Some("Three")),
     ])
 
-  let expected_error = Error(#("Is null", ["Is null"]))
+  let expected_error = Error(valid.non_empty_new("Is null", []))
 
   validator(input_col_2)
   |> should.equal(expected_error)
