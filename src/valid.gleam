@@ -1,4 +1,5 @@
 import gleam/list
+import gleam/option.{type Option, None, Some}
 import gleam/result
 import valid/vcommon.{type Errors, type ValidatorResult}
 
@@ -258,4 +259,33 @@ pub fn whole(validator: fn(whole) -> Result(whole, error)) {
       |> result.map_error(fn(error) { #(error, [error]) })
     })
   }
+}
+
+/// Integer checks
+fn int_min_check(min: Int) {
+  fn(value: Int) -> Option(Int) {
+    case value < min {
+      True -> None
+
+      False -> Some(value)
+    }
+  }
+}
+
+pub fn int_min(error: e, min: Int) {
+  vcommon.custom(error, int_min_check(min))
+}
+
+fn int_max_check(max: Int) {
+  fn(value: Int) -> Option(Int) {
+    case value > max {
+      True -> None
+
+      False -> Some(value)
+    }
+  }
+}
+
+pub fn int_max(error: e, max: Int) {
+  vcommon.custom(error, int_max_check(max))
 }

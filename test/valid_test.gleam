@@ -2,9 +2,8 @@ import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleeunit
 import gleeunit/should
-import valid as v
+import valid
 import valid/vcommon.{type ValidatorResult}
-import valid/vint
 import valid/vlist
 import valid/voption
 import valid/vstring
@@ -50,10 +49,10 @@ pub fn main() {
 }
 
 fn user_validator(user: InputUser) -> ValidatorResult(ValidUser, String) {
-  v.build3(ValidUser)
-  |> v.validate(user.name, voption.is_some("Please provide a name"))
-  |> v.validate(user.email, voption.is_some("Please provide an email"))
-  |> v.keep(user.age)
+  valid.build3(ValidUser)
+  |> valid.validate(user.name, voption.is_some("Please provide a name"))
+  |> valid.validate(user.email, voption.is_some("Please provide an email"))
+  |> valid.keep(user.age)
 }
 
 pub fn invalid_test() {
@@ -82,8 +81,8 @@ pub fn valid_test() {
 
 pub fn error_type_test() {
   let validator = fn(thing: Thing) {
-    v.build1(Thing)
-    |> v.validate(thing.name, vstring.is_not_empty(ErrorEmpty))
+    valid.build1(Thing)
+    |> valid.validate(thing.name, vstring.is_not_empty(ErrorEmpty))
   }
 
   let thing = Thing("")
@@ -102,11 +101,11 @@ pub fn custom_test() {
     }
   }
 
-  let custom = v.custom("Must be One", must_be_one)
+  let custom = valid.custom("Must be One", must_be_one)
 
   let validator = fn(thing: Thing) {
-    v.build1(Thing)
-    |> v.validate(thing.name, custom)
+    valid.build1(Thing)
+    |> valid.validate(thing.name, custom)
   }
 
   let thing_one = Thing("One")
@@ -125,12 +124,12 @@ pub fn custom_test() {
 pub fn and_test() {
   let name_validator =
     vstring.is_not_empty("Empty")
-    |> v.and(vstring.min_length("More", 6))
-    |> v.and(vstring.max_length("Less", 2))
+    |> valid.and(vstring.min_length("More", 6))
+    |> valid.and(vstring.max_length("Less", 2))
 
   let validator = fn(thing: Thing) {
-    v.build1(Thing)
-    |> v.validate(thing.name, name_validator)
+    valid.build1(Thing)
+    |> valid.validate(thing.name, name_validator)
   }
 
   let thing = Thing("One")
@@ -144,13 +143,13 @@ pub fn and_test() {
 pub fn and_with_transformation_test() {
   let name_validator =
     voption.is_some("Is null")
-    |> v.and(vstring.is_not_empty("Empty"))
-    |> v.and(vstring.min_length("More", 3))
-    |> v.and(vstring.max_length("Less", 8))
+    |> valid.and(vstring.is_not_empty("Empty"))
+    |> valid.and(vstring.min_length("More", 3))
+    |> valid.and(vstring.max_length("Less", 8))
 
   let validator = fn(thing: InputThing) {
-    v.build1(Thing)
-    |> v.validate(thing.name, name_validator)
+    valid.build1(Thing)
+    |> valid.validate(thing.name, name_validator)
   }
 
   let thing = InputThing(Some("One Thing"))
@@ -163,7 +162,7 @@ pub fn and_with_transformation_test() {
 
 pub fn all_test() {
   let name_validator =
-    v.all([
+    valid.all([
       vstring.is_not_empty("Empty"),
       vstring.min_length(">=3", 3),
       vstring.min_length(">=4", 4),
@@ -172,8 +171,8 @@ pub fn all_test() {
     ])
 
   let validator = fn(thing: Thing) {
-    v.build1(Thing)
-    |> v.validate(thing.name, name_validator)
+    valid.build1(Thing)
+    |> valid.validate(thing.name, name_validator)
   }
 
   let thing = Thing("1")
@@ -187,8 +186,8 @@ pub fn all_test() {
 pub fn compose_and_all_test() {
   let name_validator =
     voption.is_some("Is null")
-    |> v.and(
-      v.all([
+    |> valid.and(
+      valid.all([
         vstring.is_not_empty("Empty"),
         vstring.min_length(">=3", 3),
         vstring.max_length("<=10", 10),
@@ -196,8 +195,8 @@ pub fn compose_and_all_test() {
     )
 
   let validator = fn(thing: InputThing) {
-    v.build1(Thing)
-    |> v.validate(thing.name, name_validator)
+    valid.build1(Thing)
+    |> valid.validate(thing.name, name_validator)
   }
 
   let thing = InputThing(Some("One Thing after the other"))
@@ -219,10 +218,13 @@ pub fn whole_test() {
   }
 
   let validator = fn(c: Character) {
-    v.build2(Character)
-    |> v.validate(c.level, vint.min("Level must be more that zero", 1))
-    |> v.validate(c.strength, vint.min("Strength must be more that zero", 1))
-    |> v.whole(whole_validator)
+    valid.build2(Character)
+    |> valid.validate(c.level, valid.int_min("Level must be more that zero", 1))
+    |> valid.validate(
+      c.strength,
+      valid.int_min("Strength must be more that zero", 1),
+    )
+    |> valid.whole(whole_validator)
   }
 
   let char = Character(level: 1, strength: 1)
@@ -239,7 +241,7 @@ pub fn whole_test() {
 // Validators
 
 pub fn int_min_test() {
-  let validator = vint.min(">=5", 5)
+  let validator = valid.int_min(">=5", 5)
 
   validator(5)
   |> should.equal(Ok(5))
@@ -251,7 +253,7 @@ pub fn int_min_test() {
 }
 
 pub fn int_max_test() {
-  let validator = vint.max("<=5", 5)
+  let validator = valid.int_max("<=5", 5)
 
   validator(5)
   |> should.equal(Ok(5))
@@ -302,8 +304,8 @@ pub fn list_all_test() {
   let list_validator = vlist.every(vstring.min_length("Short", 3))
 
   let validator = fn(thing: ThingWithList) {
-    v.build1(ThingWithList)
-    |> v.validate(thing.items, list_validator)
+    valid.build1(ThingWithList)
+    |> valid.validate(thing.items, list_validator)
   }
 
   let thing = ThingWithList(["One", "Two"])
@@ -426,16 +428,16 @@ pub fn string_max_length_test() {
 
 pub fn nested_test() {
   let thing_validator = fn(thing: InputThing) {
-    v.build1(Thing)
-    |> v.validate(thing.name, voption.is_some("Is null"))
+    valid.build1(Thing)
+    |> valid.validate(thing.name, voption.is_some("Is null"))
   }
 
   let things_validator = vlist.every(thing_validator)
 
   let validator = fn(col: InputCollection) {
-    v.build2(ValidCollection)
-    |> v.validate(col.thing, thing_validator)
-    |> v.validate(col.things, things_validator)
+    valid.build2(ValidCollection)
+    |> valid.validate(col.thing, thing_validator)
+    |> valid.validate(col.things, things_validator)
   }
 
   let input_col_1 =
