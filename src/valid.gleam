@@ -1,3 +1,4 @@
+import gleam/dict.{type Dict}
 import gleam/float
 import gleam/function
 import gleam/int
@@ -132,6 +133,33 @@ pub fn validate(
         Error(#(first_error, previous_errors)) ->
           Error(#(first_error, list.flatten([previous_errors, errors])))
       }
+  }
+}
+
+pub fn required_in_dict(
+  accumulator: Result(fn(b) -> next_accumulator, Errors(e)),
+  input: Dict(String, a),
+  field: String,
+  access_error: e,
+  validator: fn(a) -> Result(b, Errors(e)),
+) {
+  let get = fn(input) {
+    dict.get(input, field)
+    |> option.from_result
+  }
+  required(accumulator, input, get, access_error, validator)
+}
+
+pub fn required(
+  accumulator: Result(fn(b) -> next_accumulator, Errors(e)),
+  input: input,
+  get: fn(input) -> Option(a),
+  access_error: e,
+  validator: fn(a) -> Result(b, Errors(e)),
+) {
+  case get(input) {
+    Some(a) -> validate(accumulator, a, validator)
+    None -> validate(accumulator, None, is_some(access_error))
   }
 }
 

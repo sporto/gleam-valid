@@ -1,3 +1,4 @@
+import gleam/dict.{type Dict}
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleeunit
@@ -115,6 +116,40 @@ pub fn custom_test() {
 
   validator(thing_two)
   |> should.equal(expected_error)
+}
+
+fn user_dict_validator(
+  input: Dict(String, String),
+) -> ValidatorResult(ValidUser, String) {
+  valid.build3(ValidUser)
+  |> valid.required_in_dict(
+    input,
+    "name",
+    "Missing name",
+    valid.string_is_not_empty("Please provide a name"),
+  )
+  |> valid.required_in_dict(
+    input,
+    "email",
+    "Missing email",
+    valid.string_is_email("Please provide an email"),
+  )
+  |> valid.required_in_dict(
+    input,
+    "age",
+    "Missing age",
+    valid.string_is_int("Please provide an age"),
+  )
+}
+
+pub fn get_and_validate_test() {
+  let values = [#("name", "Sam"), #("email", "sam@sample.com"), #("age", "18")]
+  let values_dict = dict.from_list(values)
+
+  let valid = ValidUser(name: "Sam", email: "sam@sample.com", age: 18)
+
+  user_dict_validator(values_dict)
+  |> should.equal(Ok(valid))
 }
 
 pub fn and_test() {
