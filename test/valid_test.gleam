@@ -121,6 +121,8 @@ pub fn custom_test() {
 fn user_dict_validator(
   input: Dict(String, String),
 ) -> ValidatorResult(ValidUser, String) {
+  let get_email = fn(d) { dict.get(d, "email") |> option.from_result }
+
   valid.build3(ValidUser)
   |> valid.required_in_dict(
     from: input,
@@ -128,9 +130,9 @@ fn user_dict_validator(
     missing: "Missing name",
     validator: valid.string_is_not_empty("Please provide a name"),
   )
-  |> valid.required_in_dict(
+  |> valid.required(
     input,
-    "email",
+    get_email,
     "Missing email",
     valid.string_is_email("Please provide an email"),
   )

@@ -165,12 +165,30 @@ pub fn required_in_dict(
   required(accumulator, input, get, access_error, validator)
 }
 
+/// Validate an attribute required in an arbitrary data type
+/// Here you provide your own accessor
+/// The accessor should return `Option(property)`
+///
+/// ## Example
+///
+/// let get_name = fn(d) { dict.get(d, "name") |> option.from_result }
+///
+///	let validator = fn(dictionary: Dict(String, String)) {
+///		valid.build1(Person)
+///		|> valid.required(
+///     from: dictionary,
+///     get: get_name,
+///     missing: "Missing name",
+///     validator: valid.string_is_not_empty(ErrorEmpty)
+///   )
+///	}
+///
 pub fn required(
   accumulator: Result(fn(b) -> next_accumulator, Errors(e)),
-  input: input,
-  get: fn(input) -> Option(a),
-  access_error: e,
-  validator: fn(a) -> Result(b, Errors(e)),
+  from input: input,
+  get get: fn(input) -> Option(a),
+  missing access_error: e,
+  validator validator: fn(a) -> Result(b, Errors(e)),
 ) {
   case get(input) {
     Some(a) -> validate(accumulator, a, validator)
