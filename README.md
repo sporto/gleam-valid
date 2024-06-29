@@ -1,6 +1,6 @@
 # Valid
 
-![CI](https://github.com/sporto/gleam-validator/workflows/test/badge.svg?branch=main)
+![CI](https://github.com/sporto/gleam-valid/workflows/test/badge.svg?branch=main)
 
 A validation library for [Gleam](https://gleam.run/).
 
@@ -18,7 +18,7 @@ gleam add valid
 
 You start with an input type and validate into an output type. These two types can be different. For example:
 
-```haskell
+```gleam
 type UserInput { UserInput(name: Option(String), age: Int) }
 
 type ValidUser { ValidUser(name: String, age: Int) }
@@ -26,23 +26,23 @@ type ValidUser { ValidUser(name: String, age: Int) }
 
 Then you create a validator like:
 
-```haskell
-import validator
-import validator/common.{ValidatorResult}
-import validator/int
-import validator/option
+```gleam
+import valid
+import valid/common.{ValidatorResult}
+import valid/int
+import valid/option
 
 fn user_validator(user: UserInput) -> ValidatorResult(ValidUser, String) {
-  validator.build2(ValidUser)
-  |> validator.validate(user.name, option.is_some("Please provide a name"))
-  |> validator.validate(user.age, int.min(13, "Must be at least 13 years old"))
+  valid.build2(ValidUser)
+  |> valid.validate(user.name, option.is_some("Please provide a name"))
+  |> valid.validate(user.age, int.min(13, "Must be at least 13 years old"))
 }
 ```
 
 And run it:
 
-```rust
-case user_validator(input) {
+```gleam
+case user_valid(input) {
   Ok(valid_user) -> ...
   Error(tuple(first_error, all_errors)) -> ...
 }
@@ -52,21 +52,21 @@ case user_validator(input) {
 
 Errors can be your own type e.g.
 
-```haskell
-import validator
-import validator/common.{ValidatorResult}
-import validator/int
-import validator/option
+```gleam
+import valid
+import valid/common.{ValidatorResult}
+import valid/int
+import valid/option
 
 type Error {
   ErrorEmptyName,
   ErrorTooYoung,
 }
 
-fn user_validator(user: UserInput) -> ValidatorResult(ValidUser, String) {
-  validator.build2(ValidUser)
-  |> validator.validate(user.name, option.is_some(ErrorEmptyName))
-  |> validator.validate(user.age, int.min(13, ErrorTooYoung))
+fn user_valid(user: UserInput) -> ValidatorResult(ValidUser, String) {
+  valid.build2(ValidUser)
+  |> valid.validate(user.name, option.is_some(ErrorEmptyName))
+  |> valid.validate(user.age, int.min(13, ErrorTooYoung))
 }
 ```
 
@@ -81,20 +81,20 @@ The first value is the first error. The second value is a list with all errors (
 
 ## Validators
 
-See the [API Docs](https://hexdocs.pm/valid/) for the list of included validators.
+See the [API Docs](https://hexdocs.pm/valid/) for the list of included valids.
 
-## Custom property validator
+## Custom property valid
 
-A property validator has two components:
+A property valid has two components:
 
 - The error to return
 - A function that transforms the property if successful (`fn(input) -> Option(output)`)
 
 Example:
 
-```rust
+```gleam
 import gleam/option.{None, Option, Some}
-import validator
+import valid
 
 fn bigger_than_10(num: Int) -> Option(num) {
   case num > 10 {
@@ -105,14 +105,14 @@ fn bigger_than_10(num: Int) -> Option(num) {
   }
 }
 
-let custom = validator.custom("Must be bigger than 10", bigger_than_10)
+let custom = valid.custom("Must be bigger than 10", bigger_than_10)
 
-let validator = fn(form: FormInput) {
-  validator.build1(ValidForm)
-  |> validator.validate(form.quantity, custom)
+let valid = fn(form: FormInput) {
+  valid.build1(ValidForm)
+  |> valid.validate(form.quantity, custom)
 }
 ```
 
 ## Examples
 
-See [the tests](https://github.com/sporto/gleam-validator/blob/main/test/valid_test.gleam) for many examples
+See [the tests](https://github.com/sporto/gleam-valid/blob/main/test/valid_test.gleam) for many examples
