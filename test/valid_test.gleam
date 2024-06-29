@@ -6,7 +6,6 @@ import valid
 import valid/vcommon.{type ValidatorResult}
 import valid/vlist
 import valid/voption
-import valid/vstring
 
 type InputUser {
   InputUser(name: Option(String), email: Option(String), age: Int)
@@ -82,7 +81,7 @@ pub fn valid_test() {
 pub fn error_type_test() {
   let validator = fn(thing: Thing) {
     valid.build1(Thing)
-    |> valid.validate(thing.name, vstring.is_not_empty(ErrorEmpty))
+    |> valid.validate(thing.name, valid.string_is_not_empty(ErrorEmpty))
   }
 
   let thing = Thing("")
@@ -123,9 +122,9 @@ pub fn custom_test() {
 
 pub fn and_test() {
   let name_validator =
-    vstring.is_not_empty("Empty")
-    |> valid.and(vstring.min_length("More", 6))
-    |> valid.and(vstring.max_length("Less", 2))
+    valid.string_is_not_empty("Empty")
+    |> valid.and(valid.string_min_length("More", 6))
+    |> valid.and(valid.string_max_length("Less", 2))
 
   let validator = fn(thing: Thing) {
     valid.build1(Thing)
@@ -143,9 +142,9 @@ pub fn and_test() {
 pub fn and_with_transformation_test() {
   let name_validator =
     voption.is_some("Is null")
-    |> valid.and(vstring.is_not_empty("Empty"))
-    |> valid.and(vstring.min_length("More", 3))
-    |> valid.and(vstring.max_length("Less", 8))
+    |> valid.and(valid.string_is_not_empty("Empty"))
+    |> valid.and(valid.string_min_length("More", 3))
+    |> valid.and(valid.string_max_length("Less", 8))
 
   let validator = fn(thing: InputThing) {
     valid.build1(Thing)
@@ -163,11 +162,11 @@ pub fn and_with_transformation_test() {
 pub fn all_test() {
   let name_validator =
     valid.all([
-      vstring.is_not_empty("Empty"),
-      vstring.min_length(">=3", 3),
-      vstring.min_length(">=4", 4),
-      vstring.min_length(">=5", 5),
-      vstring.max_length("<=10", 10),
+      valid.string_is_not_empty("Empty"),
+      valid.string_min_length(">=3", 3),
+      valid.string_min_length(">=4", 4),
+      valid.string_min_length(">=5", 5),
+      valid.string_max_length("<=10", 10),
     ])
 
   let validator = fn(thing: Thing) {
@@ -188,9 +187,9 @@ pub fn compose_and_all_test() {
     voption.is_some("Is null")
     |> valid.and(
       valid.all([
-        vstring.is_not_empty("Empty"),
-        vstring.min_length(">=3", 3),
-        vstring.max_length("<=10", 10),
+        valid.string_is_not_empty("Empty"),
+        valid.string_min_length(">=3", 3),
+        valid.string_max_length("<=10", 10),
       ]),
     )
 
@@ -301,7 +300,7 @@ pub fn list_max_length_test() {
 }
 
 pub fn list_all_test() {
-  let list_validator = vlist.every(vstring.min_length("Short", 3))
+  let list_validator = vlist.every(valid.string_min_length("Short", 3))
 
   let validator = fn(thing: ThingWithList) {
     valid.build1(ThingWithList)
@@ -334,7 +333,7 @@ pub fn option_is_some_test() {
 }
 
 pub fn option_optional_test() {
-  let validator = voption.optional(vstring.min_length("Short", 3))
+  let validator = voption.optional(valid.string_min_length("Short", 3))
 
   validator(None)
   |> should.equal(Ok(None))
@@ -349,7 +348,7 @@ pub fn option_optional_test() {
 }
 
 pub fn string_not_empty_test() {
-  let validator = vstring.is_not_empty("Empty")
+  let validator = valid.string_is_not_empty("Empty")
 
   validator("One")
   |> should.equal(Ok("One"))
@@ -361,7 +360,7 @@ pub fn string_not_empty_test() {
 }
 
 pub fn string_is_int_test() {
-  let validator = vstring.is_int("NaN")
+  let validator = valid.string_is_int("NaN")
 
   validator("1")
   |> should.equal(Ok(1))
@@ -373,7 +372,7 @@ pub fn string_is_int_test() {
 }
 
 pub fn string_is_float_test() {
-  let validator = vstring.is_float("NaN")
+  let validator = valid.string_is_float("NaN")
 
   validator("1.1")
   |> should.equal(Ok(1.1))
@@ -385,7 +384,7 @@ pub fn string_is_float_test() {
 }
 
 pub fn string_is_email_test() {
-  let validator = vstring.is_email("Not email")
+  let validator = valid.string_is_email("Not email")
 
   ["a@b", "a1@b", "a1@b.com", "a1@b.com.au"]
   |> list.map(fn(email) {
@@ -403,7 +402,7 @@ pub fn string_is_email_test() {
 }
 
 pub fn string_min_length_test() {
-  let validator = vstring.min_length("Less than 3", 3)
+  let validator = valid.string_min_length("Less than 3", 3)
 
   validator("One")
   |> should.equal(Ok("One"))
@@ -415,7 +414,7 @@ pub fn string_min_length_test() {
 }
 
 pub fn string_max_length_test() {
-  let validator = vstring.max_length("More than 5", 5)
+  let validator = valid.string_max_length("More than 5", 5)
 
   validator("Hello")
   |> should.equal(Ok("Hello"))
