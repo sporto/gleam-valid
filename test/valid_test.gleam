@@ -1,10 +1,10 @@
+import gleam/function
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleeunit
 import gleeunit/should
 import valid
-import valid/vcommon.{type ValidatorResult}
-import valid/vlist
+import valid/vcommon.{type Validator, type ValidatorResult}
 import valid/voption
 
 type InputUser {
@@ -264,7 +264,7 @@ pub fn int_max_test() {
 }
 
 pub fn list_is_not_empty_test() {
-  let validator = vlist.is_not_empty("Empty")
+  let validator = valid.list_is_not_empty("Empty")
 
   validator([1])
   |> should.equal(Ok([1]))
@@ -276,7 +276,7 @@ pub fn list_is_not_empty_test() {
 }
 
 pub fn list_min_length_test() {
-  let validator = vlist.min_length("Short", 3)
+  let validator = valid.list_min_length("Short", 3)
 
   validator([1, 2, 3])
   |> should.equal(Ok([1, 2, 3]))
@@ -288,7 +288,7 @@ pub fn list_min_length_test() {
 }
 
 pub fn list_max_length_test() {
-  let validator = vlist.max_length("Long", 4)
+  let validator = valid.list_max_length("Long", 4)
 
   validator([1, 2, 3])
   |> should.equal(Ok([1, 2, 3]))
@@ -300,7 +300,7 @@ pub fn list_max_length_test() {
 }
 
 pub fn list_all_test() {
-  let list_validator = vlist.every(valid.string_min_length("Short", 3))
+  let list_validator = valid.list_every(valid.string_min_length("Short", 3))
 
   let validator = fn(thing: ThingWithList) {
     valid.build1(ThingWithList)
@@ -431,7 +431,7 @@ pub fn nested_test() {
     |> valid.validate(thing.name, voption.is_some("Is null"))
   }
 
-  let things_validator = vlist.every(thing_validator)
+  let things_validator = valid.list_every(thing_validator)
 
   let validator = fn(col: InputCollection) {
     valid.build2(ValidCollection)

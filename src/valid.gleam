@@ -1,11 +1,12 @@
 import gleam/float
+import gleam/function
 import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/regex
 import gleam/result
 import gleam/string
-import valid/vcommon.{type Errors, type ValidatorResult}
+import valid/vcommon.{type Errors, type Validator, type ValidatorResult}
 
 fn curry2(constructor: fn(a, b) -> value) {
   fn(a) { fn(b) { constructor(a, b) } }
@@ -376,4 +377,92 @@ fn string_max_length_check(max: Int) {
 /// Validate the max length of a string
 pub fn string_max_length(error: e, max: Int) {
   vcommon.custom(error, string_max_length_check(max))
+}
+
+/// List checks
+///
+fn list_is_not_empty_check(value: List(a)) -> Option(List(a)) {
+  case list.is_empty(value) {
+    True -> None
+
+    False -> Some(value)
+  }
+}
+
+/// Validate that a list is not empty
+pub fn list_is_not_empty(error: error) {
+  vcommon.custom(error, list_is_not_empty_check)
+}
+
+fn list_min_length_check(min: Int) {
+  fn(value: List(a)) -> Option(List(a)) {
+    case list.length(value) < min {
+      True -> None
+
+      False -> Some(value)
+    }
+  }
+}
+
+/// Validate the min number of items in a list
+pub fn list_min_length(error: error, min: Int) {
+  vcommon.custom(error, list_min_length_check(min))
+}
+
+fn list_max_length_check(max: Int) {
+  fn(value: List(a)) -> Option(List(a)) {
+    case list.length(value) > max {
+      True -> None
+
+      False -> Some(value)
+    }
+  }
+}
+
+/// Validate the max number of items in a list
+pub fn list_max_length(error: error, max: Int) {
+  vcommon.custom(error, list_max_length_check(max))
+}
+
+/// Validate a list of items.
+///
+/// Run the given validator for each item returning all the errors.
+///
+/// ## Example
+///
+///	type Collection = { Collection(items: List(String) ) }
+///
+///	let list_validator = valid.list_every(
+///		valid.string_min_length("Must be at least 3", 3)
+///	)
+///
+///	let validator = fn(collection: Collection) {
+///		v.build1(Collection)
+///		|> v.validate(collection.items, list_validator)
+///	}
+pub fn list_every(validator: Validator(input, output, error)) {
+  fn(items: List(input)) {
+    let results =
+      items
+      |> list.map(validator)
+
+    let errors =
+      results
+      |> list.map(fn(result) {
+        case result {
+          Ok(_) -> []
+          Error(#(_first, rest)) -> rest
+        }
+      })
+      |> list.flatten
+
+    let ok_items =
+      results
+      |> list.filter_map(function.identity)
+
+    case list.first(errors) {
+      Error(Nil) -> Ok(ok_items)
+      Ok(head) -> Error(#(head, errors))
+    }
+  }
 }
