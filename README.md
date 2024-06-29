@@ -28,14 +28,14 @@ Then you create a validator like:
 
 ```gleam
 import valid
-import valid/common.{ValidatorResult}
-import valid/int
-import valid/option
+import valid/vcommon.{type ValidatorResult}
+import valid/vint
+import valid/voption
 
 fn user_validator(user: UserInput) -> ValidatorResult(ValidUser, String) {
   valid.build2(ValidUser)
-  |> valid.validate(user.name, option.is_some("Please provide a name"))
-  |> valid.validate(user.age, int.min(13, "Must be at least 13 years old"))
+  |> valid.validate(user.name, voption.is_some("Please provide a name"))
+  |> valid.validate(user.age, vint.min(13, "Must be at least 13 years old"))
 }
 ```
 
@@ -54,9 +54,9 @@ Errors can be your own type e.g.
 
 ```gleam
 import valid
-import valid/common.{ValidatorResult}
-import valid/int
-import valid/option
+import valid/vcommon.{type ValidatorResult}
+import valid/vint
+import valid/voption
 
 type Error {
   ErrorEmptyName,
@@ -65,8 +65,8 @@ type Error {
 
 fn user_valid(user: UserInput) -> ValidatorResult(ValidUser, String) {
   valid.build2(ValidUser)
-  |> valid.validate(user.name, option.is_some(ErrorEmptyName))
-  |> valid.validate(user.age, int.min(13, ErrorTooYoung))
+  |> valid.validate(user.name, voption.is_some(ErrorEmptyName))
+  |> valid.validate(user.age, vint.min(13, ErrorTooYoung))
 }
 ```
 

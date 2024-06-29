@@ -1,5 +1,5 @@
 import gleam/option.{type Option, None, Some}
-import valid/common
+import valid/vcommon
 
 fn min_check(min: Int) {
   fn(value: Int) -> Option(Int) {
@@ -12,7 +12,7 @@ fn min_check(min: Int) {
 }
 
 pub fn min(error: e, min: Int) {
-  common.custom(error, min_check(min))
+  vcommon.custom(error, min_check(min))
 }
 
 fn max_check(max: Int) {
@@ -26,5 +26,5 @@ fn max_check(max: Int) {
 }
 
 pub fn max(error: e, max: Int) {
-  common.custom(error, max_check(max))
+  vcommon.custom(error, max_check(max))
 }

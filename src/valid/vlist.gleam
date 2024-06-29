@@ -1,7 +1,7 @@
-import valid/common.{type Validator}
 import gleam/function
 import gleam/list
 import gleam/option.{type Option, None, Some}
+import valid/vcommon.{type Validator}
 
 fn is_not_empty_check(value: List(a)) -> Option(List(a)) {
   case list.is_empty(value) {
@@ -13,7 +13,7 @@ fn is_not_empty_check(value: List(a)) -> Option(List(a)) {
 
 /// Validate that a list is not empty
 pub fn is_not_empty(error: error) {
-  common.custom(error, is_not_empty_check)
+  vcommon.custom(error, is_not_empty_check)
 }
 
 fn min_length_check(min: Int) {
@@ -28,7 +28,7 @@ fn min_length_check(min: Int) {
 
 /// Validate the min number of items in a list
 pub fn min_length(error: error, min: Int) {
-  common.custom(error, min_length_check(min))
+  vcommon.custom(error, min_length_check(min))
 }
 
 fn max_length_check(max: Int) {
@@ -43,7 +43,7 @@ fn max_length_check(max: Int) {
 
 /// Validate the max number of items in a list
 pub fn max_length(error: error, max: Int) {
-  common.custom(error, max_length_check(max))
+  vcommon.custom(error, max_length_check(max))
 }
 
 /// Validate a list of items.

@@ -1,5 +1,5 @@
 import gleam/option.{type Option, None, Some}
-import valid/common.{type Validator}
+import valid/vcommon.{type Validator}
 
 fn is_some_check(maybe: Option(value)) -> Option(value) {
   case maybe {
@@ -23,7 +23,7 @@ fn is_some_check(maybe: Option(value)) -> Option(value) {
 ///	}
 ///
 pub fn is_some(error: e) -> Validator(Option(i), i, e) {
-  common.custom(error, is_some_check)
+  vcommon.custom(error, is_some_check)
 }
 
 /// Validate an optional value.

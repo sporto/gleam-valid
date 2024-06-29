@@ -1,6 +1,6 @@
 import gleam/list
 import gleam/result
-import valid/common.{type Errors, type ValidatorResult}
+import valid/vcommon.{type Errors, type ValidatorResult}
 
 fn curry2(constructor: fn(a, b) -> value) {
   fn(a) { fn(b) { constructor(a, b) } }
@@ -158,7 +158,7 @@ pub fn keep(
 ///		|> v.validate(person.name, v.custom("Not Sam", must_be_sam))
 ///	}
 pub fn custom(error, check) {
-  common.custom(error, check)
+  vcommon.custom(error, check)
 }
 
 /// Compose validators
@@ -171,9 +171,9 @@ pub fn custom(error, check) {
 ///	let name_validator = v_string.is_not_empty("Empty")
 ///	|> v.and(v_string.min_length("Must be at least six", 6))
 pub fn and(
-  validator1: common.Validator(i, mid, e),
-  validator2: common.Validator(mid, o, e),
-) -> common.Validator(i, o, e) {
+  validator1: vcommon.Validator(i, mid, e),
+  validator2: vcommon.Validator(mid, o, e),
+) -> vcommon.Validator(i, o, e) {
   fn(input: i) {
     validator1(input)
     |> result.then(validator2)
@@ -202,8 +202,8 @@ pub fn and(
 ///		|> v.validate(person.name, name_validator)
 ///	}
 pub fn all(
-  validators: List(common.Validator(io, io, e)),
-) -> common.Validator(io, io, e) {
+  validators: List(vcommon.Validator(io, io, e)),
+) -> vcommon.Validator(io, io, e) {
   fn(input: io) -> Result(io, Errors(e)) {
     let results =
       validators
