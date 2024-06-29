@@ -27,15 +27,12 @@ type ValidUser { ValidUser(name: String, age: Int) }
 Then you create a validator like:
 
 ```gleam
-import valid
-import valid/vcommon.{type ValidatorResult}
-import valid/vint
-import valid/voption
+import valid.{type ValidatorResult}
 
 fn user_validator(user: UserInput) -> ValidatorResult(ValidUser, String) {
   valid.build2(ValidUser)
-  |> valid.validate(user.name, voption.is_some("Please provide a name"))
-  |> valid.validate(user.age, vint.min(13, "Must be at least 13 years old"))
+  |> valid.validate(user.name, valid.is_some("Please provide a name"))
+  |> valid.validate(user.age, valid.int_min(13, "Must be at least 13 years old"))
 }
 ```
 
@@ -53,10 +50,7 @@ case user_valid(input) {
 Errors can be your own type e.g.
 
 ```gleam
-import valid
-import valid/vcommon.{type ValidatorResult}
-import valid/vint
-import valid/voption
+import valid.{type ValidatorResult}
 
 type Error {
   ErrorEmptyName,
@@ -65,8 +59,8 @@ type Error {
 
 fn user_valid(user: UserInput) -> ValidatorResult(ValidUser, String) {
   valid.build2(ValidUser)
-  |> valid.validate(user.name, voption.is_some(ErrorEmptyName))
-  |> valid.validate(user.age, vint.min(13, ErrorTooYoung))
+  |> valid.validate(user.name, valid.is_some(ErrorEmptyName))
+  |> valid.validate(user.age, valid.int_min(13, ErrorTooYoung))
 }
 ```
 
@@ -83,9 +77,9 @@ The first value is the first error. The second value is a list with all errors (
 
 See the [API Docs](https://hexdocs.pm/valid/) for the list of included valids.
 
-## Custom property valid
+## Custom property validator
 
-A property valid has two components:
+A property validator has two components:
 
 - The error to return
 - A function that transforms the property if successful (`fn(input) -> Option(output)`)

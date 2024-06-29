@@ -53,8 +53,8 @@ fn curry6(constructor: fn(a, b, c, d, e, f) -> value) {
 ///	type Person { Person(name: String) }
 ///
 ///	let validator = fn(person: Person) {
-///		v.build1(person)
-///		|> v.validate(person.name, name_validator)
+///		valid.build1(person)
+///		|> valid.validate(person.name, name_validator)
 ///	}
 pub fn build1(constructor) {
   Ok(constructor)
@@ -67,9 +67,9 @@ pub fn build1(constructor) {
 ///	type Person { Person(name: String, age: Int) }
 ///
 ///	let validator = fn(person: Person) {
-///		v.build2(person)
-///		|> v.validate(person.name, name_validator)
-///		|> v.validate(person.age, ...)
+///		valid.build2(person)
+///		|> valid.validate(person.name, name_validator)
+///		|> valid.validate(person.age, ...)
 ///	}
 pub fn build2(constructor) {
   Ok(curry2(constructor))
@@ -82,10 +82,10 @@ pub fn build2(constructor) {
 ///	type Person { Person(name: String, age: Int, email: String) }
 ///
 ///	let validator = fn(person: Person) {
-///		v.build3(person)
-///		|> v.validate(person.name, name_validator)
-///		|> v.validate(person.age, ...)
-///		|> v.validate(person.email, ...)
+///		valid.build3(person)
+///		|> valid.validate(person.name, name_validator)
+///		|> valid.validate(person.age, ...)
+///		|> valid.validate(person.email, ...)
 ///	}
 pub fn build3(constructor) {
   Ok(curry3(constructor))
@@ -111,8 +111,8 @@ pub fn build6(constructor) {
 /// ## Example
 ///
 ///	let validator = fn(person: Person) {
-///		v.build1(Person)
-///		|> v.validate(person.name, v_string.is_not_empty(ErrorEmpty))
+///		valid.build1(Person)
+///		|> valid.validate(person.name, valid.string_is_not_empty(ErrorEmpty))
 ///	}
 ///
 pub fn validate(
@@ -140,9 +140,9 @@ pub fn validate(
 /// ## Example
 ///
 ///	fn person_validor(person: Person) {
-///		v.build2(Person)
-///			|> v.validate(person.name, ...)
-///			|> v.keep(person.age)
+///		valid.build2(Person)
+///			|> valid.validate(person.name, ...)
+///			|> valid.keep(person.age)
 ///	}
 ///
 pub fn keep(
@@ -174,8 +174,8 @@ pub fn keep(
 ///	}
 ///
 ///	let validator = fn(person: Person) {
-///		v.build1(Person)
-///		|> v.validate(person.name, v.custom("Not Sam", must_be_sam))
+///		valid.build1(Person)
+///		|> valid.validate(person.name, valid.custom("Not Sam", must_be_sam))
 ///	}
 pub fn custom(
   error: e,
@@ -197,8 +197,8 @@ pub fn custom(
 ///
 /// ## Example
 ///
-///	let name_validator = v_string.is_not_empty("Empty")
-///	|> v.and(v_string.min_length("Must be at least six", 6))
+///	let name_validator = valid.string_is_not_empty("Empty")
+///	|> valid.and(valid.string_min_length("Must be at least six", 6))
 pub fn and(
   validator1: Validator(i, mid, e),
   validator2: Validator(mid, o, e),
@@ -220,15 +220,15 @@ pub fn and(
 ///
 /// ## Example
 ///
-///	let name_validator = v.all([
-///		v_string.is_not_empty("Empty"),
-///		v_string.min_length(">=3", 3),
-///		v_string.max_length("<=10", 10)
+///	let name_validator = valid.all([
+///		valid.string_is_not_empty("Empty"),
+///		valid.string_min_length(">=3", 3),
+///		valid.string_max_length("<=10", 10)
 ///	])
 ///
 ///	let validator = fn(person: Person) {
-///		v.build1(person)
-///		|> v.validate(person.name, name_validator)
+///		valid.build1(person)
+///		|> valid.validate(person.name, name_validator)
 ///	}
 pub fn all(validators: List(Validator(io, io, e))) -> Validator(io, io, e) {
   fn(input: io) -> Result(io, Errors(e)) {
@@ -271,10 +271,10 @@ pub fn all(validators: List(Validator(io, io, e))) -> Validator(io, io, e) {
 ///	}
 ///
 ///	let validator = fn(c: Character) {
-///		v.build2(Character)
-///		|> v.validate(c.level, v_int.min("Level must be more that zero", 1))
-///		|> v.validate(c.strength, v_int.min("Strength must be more that zero", 1))
-///		|> v.whole(strengh_and_level_validator)
+///		valid.build2(Character)
+///		|> valid.validate(c.level, valid.int_min("Level must be more that zero", 1))
+///		|> valid.validate(c.strength, valid.int_min("Strength must be more that zero", 1))
+///		|> valid.whole(strengh_and_level_validator)
 ///	}
 ///
 pub fn whole(validator: fn(whole) -> Result(whole, error)) {
@@ -458,8 +458,8 @@ pub fn list_max_length(error: error, max: Int) {
 ///	)
 ///
 ///	let validator = fn(collection: Collection) {
-///		v.build1(Collection)
-///		|> v.validate(collection.items, list_validator)
+///		valid.build1(Collection)
+///		|> valid.validate(collection.items, list_validator)
 ///	}
 pub fn list_every(validator: Validator(input, output, error)) {
   fn(items: List(input)) {
@@ -507,8 +507,8 @@ fn is_some_check(maybe: Option(value)) -> Option(value) {
 ///	type PersonValid { PersonValid(name: String) }
 ///
 ///	let validator = fn(person) {
-///		v.build1(PersonValid)
-///		|> v.validate(person.name, valid.is_some("Name is null"))
+///		valid.build1(PersonValid)
+///		|> valid.validate(person.name, valid.is_some("Name is null"))
 ///	}
 ///
 pub fn is_some(error: e) -> Validator(Option(i), i, e) {
@@ -523,10 +523,10 @@ pub fn is_some(error: e) -> Validator(Option(i), i, e) {
 /// ## Example
 ///
 ///	let validator = fn(person) {
-///		v.build1(PersonValid)
-///		|> v.validate(
+///		valid.build1(PersonValid)
+///		|> valid.validate(
 ///			person.name,
-///			valid.optional(string.min_length("Short", 3))
+///			valid.optional(valid.string_min_length("Short", 3))
 ///		)
 ///	}
 ///
