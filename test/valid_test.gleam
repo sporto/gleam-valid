@@ -6,11 +6,16 @@ import gleeunit/should
 import valid.{type Validator, type ValidatorResult}
 
 type InputUser {
-  InputUser(name: Option(String), email: Option(String), age: Int)
+  InputUser(
+    name: Option(String),
+    email: Option(String),
+    age: Int,
+    weight: Option(Int),
+  )
 }
 
 type ValidUser {
-  ValidUser(name: String, email: String, age: Int)
+  ValidUser(name: String, email: String, age: Int, weight: Option(Int))
 }
 
 type InputThing {
@@ -45,15 +50,18 @@ pub fn main() {
   gleeunit.main()
 }
 
+// TODO add key from dict
+
 fn user_validator(user: InputUser) -> ValidatorResult(ValidUser, String) {
-  valid.build3(ValidUser)
+  valid.build4(ValidUser)
   |> valid.validate(user.name, valid.is_some("Please provide a name"))
   |> valid.validate(user.email, valid.is_some("Please provide an email"))
   |> valid.keep(user.age)
+  |> valid.keep(user.weight)
 }
 
 pub fn invalid_test() {
-  let invalid = InputUser(name: None, email: None, age: 0)
+  let invalid = InputUser(name: None, email: None, age: 0, weight: None)
 
   let expected =
     Error(
@@ -68,9 +76,15 @@ pub fn invalid_test() {
 
 pub fn valid_test() {
   let valid_input =
-    InputUser(name: Some("Sam"), email: Some("sam@sample.com"), age: 11)
+    InputUser(
+      name: Some("Sam"),
+      email: Some("sam@sample.com"),
+      age: 11,
+      weight: Some(20),
+    )
 
-  let valid = ValidUser(name: "Sam", email: "sam@sample.com", age: 11)
+  let valid =
+    ValidUser(name: "Sam", email: "sam@sample.com", age: 11, weight: Some(20))
 
   user_validator(valid_input)
   |> should.equal(Ok(valid))
@@ -123,24 +137,29 @@ fn user_dict_validator(
 ) -> ValidatorResult(ValidUser, String) {
   let get_email = fn(d) { dict.get(d, "email") |> option.from_result }
 
-  valid.build3(ValidUser)
-  |> valid.required_in_dict(
+  valid.build4(ValidUser)
+  |> valid.validate_required_in_dict(
     from: input,
     get: "name",
     missing: "Missing name",
     validator: valid.string_is_not_empty("Please provide a name"),
   )
-  |> valid.required(
+  |> valid.validate_required(
     input,
     get_email,
     "Missing email",
     valid.string_is_email("Please provide an email"),
   )
-  |> valid.required_in_dict(
+  |> valid.validate_required_in_dict(
     input,
     "age",
     "Missing age",
     valid.string_is_int("Please provide an age"),
+  )
+  |> valid.validate_optional_in_dict(
+    input,
+    "balance",
+    valid.string_is_int("Please provide a valid number"),
   )
 }
 
@@ -148,7 +167,8 @@ pub fn get_and_validate_test() {
   let values = [#("name", "Sam"), #("email", "sam@sample.com"), #("age", "18")]
   let values_dict = dict.from_list(values)
 
-  let valid = ValidUser(name: "Sam", email: "sam@sample.com", age: 18)
+  let valid =
+    ValidUser(name: "Sam", email: "sam@sample.com", age: 18, weight: Some(20))
 
   user_dict_validator(values_dict)
   |> should.equal(Ok(valid))
@@ -366,7 +386,7 @@ pub fn option_is_some_test() {
   |> should.equal(expected_error)
 }
 
-pub fn option_optional_test() {
+pub fn optional_test() {
   let validator = valid.optional(valid.string_min_length("Short", 3))
 
   validator(None)
@@ -376,6 +396,21 @@ pub fn option_optional_test() {
   |> should.equal(Ok(Some("abc")))
 
   let expected_error = Error(#("Short", ["Short"]))
+
+  validator(Some("a"))
+  |> should.equal(expected_error)
+}
+
+pub fn optional_different_type_test() {
+  let validator = valid.optional(valid.string_is_int("Not Int"))
+
+  validator(None)
+  |> should.equal(Ok(None))
+
+  validator(Some("1"))
+  |> should.equal(Ok(Some(1)))
+
+  let expected_error = Error(#("Not Int", ["Not Int"]))
 
   validator(Some("a"))
   |> should.equal(expected_error)

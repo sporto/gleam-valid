@@ -143,7 +143,7 @@ pub fn validate(
 ///
 ///	let validator = fn(dictionary: Dict(String, String)) {
 ///		valid.build1(Person)
-///		|> valid.required_in_dict(
+///		|> valid.validate_required_in_dict(
 ///     from: dictionary,
 ///     get: "name",
 ///     missing: "Missing name",
@@ -151,7 +151,7 @@ pub fn validate(
 ///   )
 ///	}
 ///
-pub fn required_in_dict(
+pub fn validate_required_in_dict(
   accumulator: Result(fn(b) -> next_accumulator, Errors(e)),
   from input: Dict(String, a),
   get field: String,
@@ -162,7 +162,7 @@ pub fn required_in_dict(
     dict.get(input, field)
     |> option.from_result
   }
-  required(accumulator, input, get, access_error, validator)
+  validate_required(accumulator, input, get, access_error, validator)
 }
 
 /// Validate an attribute required in an arbitrary data type
@@ -175,7 +175,7 @@ pub fn required_in_dict(
 ///
 ///	let validator = fn(dictionary: Dict(String, String)) {
 ///		valid.build1(Person)
-///		|> valid.required(
+///		|> valid.validate_required(
 ///     from: dictionary,
 ///     get: get_name,
 ///     missing: "Missing name",
@@ -183,7 +183,7 @@ pub fn required_in_dict(
 ///   )
 ///	}
 ///
-pub fn required(
+pub fn validate_required(
   accumulator: Result(fn(b) -> next_accumulator, Errors(e)),
   from input: input,
   get get: fn(input) -> Option(a),
@@ -194,6 +194,54 @@ pub fn required(
     Some(a) -> validate(accumulator, a, validator)
     None -> validate(accumulator, None, is_some(access_error))
   }
+}
+
+/// Validate an optional attribute in an arbitrary data type
+/// Here you provide your own accessor
+/// This accessor should return `Option(property)`
+/// The output type needs to accept an `Option` for this field
+/// When the attribute cannot be found, then `None` will be set in the output
+///
+/// ## Example
+///
+/// type Person{
+///   Person(name: Option(String))
+/// }
+///
+/// let get_name = fn(d) { dict.get(d, "name") |> option.from_result }
+///
+///	let validator = fn(dictionary: Dict(String, String)) {
+///		valid.build1(Person)
+///		|> valid.validate_optional(
+///     from: dictionary,
+///     get: get_name,
+///     validator: valid.string_is_not_empty(ErrorEmpty)
+///   )
+///	}
+///
+pub fn validate_optional(
+  accumulator: Result(fn(Option(b)) -> next_accumulator, Errors(e)),
+  from input: input,
+  get get: fn(input) -> Option(a),
+  validator validator: fn(a) -> Result(b, Errors(e)),
+) {
+  case get(input) {
+    Some(a) -> validate(accumulator, a, validator)
+    None -> accumulator(Ok(None))
+  }
+}
+
+pub fn validate_optional_in_dict(
+  accumulator: Result(fn(b) -> next_accumulator, Errors(e)),
+  from input: Dict(String, a),
+  get field: String,
+  validator validator: fn(a) -> Result(b, Errors(e)),
+) {
+  let get = fn(input) {
+    dict.get(input, field)
+    |> option.from_result
+  }
+  validate_optional(accumulator, input, get, validator)
 }
 
 /// Keep a value as is.
@@ -591,16 +639,19 @@ pub fn is_some(error: e) -> Validator(Option(i), i, e) {
 ///		)
 ///	}
 ///
-pub fn optional(validator: Validator(input, input, error)) {
-  fn(maybe: Option(input)) {
-    case maybe {
-      None -> Ok(maybe)
+pub fn optional(
+  validator: Validator(a, b, error),
+) -> Validator(Option(a), Option(b), error) {
+  fn(maybe_a: Option(a)) {
+    case maybe_a {
+      None -> Ok(None)
 
-      Some(value) ->
-        case validator(value) {
-          Ok(_) -> Ok(maybe)
+      Some(a) -> {
+        case validator(a) {
+          Ok(b) -> Ok(Some(b))
           Error(error) -> Error(error)
         }
+      }
     }
   }
 }
