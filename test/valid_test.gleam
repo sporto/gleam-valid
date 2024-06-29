@@ -1,4 +1,5 @@
 import gleam/dict.{type Dict}
+import gleam/function
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleeunit
@@ -50,13 +51,11 @@ pub fn main() {
   gleeunit.main()
 }
 
-// TODO add key from dict
-
 fn user_validator(user: InputUser) -> ValidatorResult(ValidUser, String) {
   valid.build4(ValidUser)
-  |> valid.validate(user.name, valid.is_some("Please provide a name"))
-  |> valid.validate(user.email, valid.is_some("Please provide an email"))
-  |> valid.keep(user.age)
+  |> valid.check(user.name, valid.is_some("Please provide a name"))
+  |> valid.check(user.email, valid.is_some("Please provide an email"))
+  |> valid.check(user.age, valid.ok())
   |> valid.keep(user.weight)
 }
 
@@ -93,7 +92,7 @@ pub fn valid_test() {
 pub fn error_type_test() {
   let validator = fn(thing: Thing) {
     valid.build1(Thing)
-    |> valid.validate(thing.name, valid.string_is_not_empty(ErrorEmpty))
+    |> valid.check(thing.name, valid.string_is_not_empty(ErrorEmpty))
   }
 
   let thing = Thing("")
@@ -116,7 +115,7 @@ pub fn custom_test() {
 
   let validator = fn(thing: Thing) {
     valid.build1(Thing)
-    |> valid.validate(thing.name, custom)
+    |> valid.check(thing.name, custom)
   }
 
   let thing_one = Thing("One")
@@ -138,31 +137,29 @@ fn user_dict_validator(
   let get_email = fn(d) { dict.get(d, "email") |> option.from_result }
 
   valid.build4(ValidUser)
-  |> valid.validate(
+  |> valid.check(
     input,
     valid.required_in_dict("name", "Missing name")
-      |> valid.and(valid.string_is_not_empty("Please provide a name")),
+      |> valid.and_string_is_not_empty("Please provide a name"),
   )
-  |> valid.validate(
+  |> valid.check(
     input,
     valid.required_in(get_email, "Missing Email")
-      |> valid.and(valid.string_is_email("Please provide an email")),
+      |> valid.and_string_is_email("Please provide an email"),
   )
-  |> valid.validate(
+  |> valid.check(
     input,
     valid.required_in_dict("age", "Missing age")
-      |> valid.and(valid.string_is_int("Please provide an age")),
+      |> valid.and_string_is_int("Please provide an age"),
   )
-  |> valid.validate(
+  |> valid.check(
     input,
     valid.optional_in_dict("weight")
-      |> valid.and(
-        valid.optional(valid.string_is_int("Please provide a valid number")),
-      ),
+      |> valid.and_optional(valid.string_is_int("Please provide a valid number")),
   )
 }
 
-pub fn get_and_validate_test() {
+pub fn using_a_dictionary_test() {
   let values = [
     #("name", "Sam"),
     #("email", "sam@sample.com"),
@@ -181,12 +178,12 @@ pub fn get_and_validate_test() {
 pub fn and_test() {
   let name_validator =
     valid.string_is_not_empty("Empty")
-    |> valid.and(valid.string_min_length("More", 6))
-    |> valid.and(valid.string_max_length("Less", 2))
+    |> valid.and_string_min_length("More", 6)
+    |> valid.and_string_max_length("Less", 2)
 
   let validator = fn(thing: Thing) {
     valid.build1(Thing)
-    |> valid.validate(thing.name, name_validator)
+    |> valid.check(thing.name, name_validator)
   }
 
   let thing = Thing("One")
@@ -206,7 +203,7 @@ pub fn and_with_transformation_test() {
 
   let validator = fn(thing: InputThing) {
     valid.build1(Thing)
-    |> valid.validate(thing.name, name_validator)
+    |> valid.check(thing.name, name_validator)
   }
 
   let thing = InputThing(Some("One Thing"))
@@ -229,7 +226,7 @@ pub fn all_test() {
 
   let validator = fn(thing: Thing) {
     valid.build1(Thing)
-    |> valid.validate(thing.name, name_validator)
+    |> valid.check(thing.name, name_validator)
   }
 
   let thing = Thing("1")
@@ -253,7 +250,7 @@ pub fn compose_and_all_test() {
 
   let validator = fn(thing: InputThing) {
     valid.build1(Thing)
-    |> valid.validate(thing.name, name_validator)
+    |> valid.check(thing.name, name_validator)
   }
 
   let thing = InputThing(Some("One Thing after the other"))
@@ -262,6 +259,16 @@ pub fn compose_and_all_test() {
 
   validator(thing)
   |> should.equal(expected_error)
+}
+
+pub fn keep_test() {
+  let validator = fn(thing: Thing) {
+    valid.build1(Thing)
+    |> valid.keep(thing.name)
+  }
+
+  validator(Thing(name: "Sam"))
+  |> should.equal(Ok(Thing(name: "Sam")))
 }
 
 pub fn whole_test() {
@@ -276,8 +283,8 @@ pub fn whole_test() {
 
   let validator = fn(c: Character) {
     valid.build2(Character)
-    |> valid.validate(c.level, valid.int_min("Level must be more that zero", 1))
-    |> valid.validate(
+    |> valid.check(c.level, valid.int_min("Level must be more that zero", 1))
+    |> valid.check(
       c.strength,
       valid.int_min("Strength must be more that zero", 1),
     )
@@ -362,7 +369,7 @@ pub fn list_all_test() {
 
   let validator = fn(thing: ThingWithList) {
     valid.build1(ThingWithList)
-    |> valid.validate(thing.items, list_validator)
+    |> valid.check(thing.items, list_validator)
   }
 
   let thing = ThingWithList(["One", "Two"])
@@ -418,6 +425,46 @@ pub fn optional_different_type_test() {
 
   validator(Some("a"))
   |> should.equal(expected_error)
+}
+
+pub fn optional_in_test() {
+  let validator = valid.optional_in(function.identity)
+
+  validator(None)
+  |> should.equal(Ok(None))
+
+  validator(Some(1))
+  |> should.equal(Ok(Some(1)))
+}
+
+pub fn optional_in_dict_test() {
+  let validator = valid.optional_in_dict("key")
+
+  validator(dict.new())
+  |> should.equal(Ok(None))
+
+  validator([#("key", 1)] |> dict.from_list)
+  |> should.equal(Ok(Some(1)))
+}
+
+pub fn required_in_test() {
+  let validator = valid.required_in(function.identity, "Absent")
+
+  validator(None)
+  |> should.equal(Error(#("Absent", ["Absent"])))
+
+  validator(Some(1))
+  |> should.equal(Ok(1))
+}
+
+pub fn required_in_dict_test() {
+  let validator = valid.required_in_dict("name", "Absent")
+
+  validator(dict.new())
+  |> should.equal(Error(#("Absent", ["Absent"])))
+
+  validator([#("name", "sam")] |> dict.from_list)
+  |> should.equal(Ok("sam"))
 }
 
 pub fn string_not_empty_test() {
@@ -501,15 +548,15 @@ pub fn string_max_length_test() {
 pub fn nested_test() {
   let thing_validator = fn(thing: InputThing) {
     valid.build1(Thing)
-    |> valid.validate(thing.name, valid.is_some("Is null"))
+    |> valid.check(thing.name, valid.is_some("Is null"))
   }
 
   let things_validator = valid.list_every(thing_validator)
 
   let validator = fn(col: InputCollection) {
     valid.build2(ValidCollection)
-    |> valid.validate(col.thing, thing_validator)
-    |> valid.validate(col.things, things_validator)
+    |> valid.check(col.thing, thing_validator)
+    |> valid.check(col.things, things_validator)
   }
 
   let input_col_1 =

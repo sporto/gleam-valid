@@ -31,8 +31,8 @@ import valid.{type ValidatorResult}
 
 fn user_validator(user: UserInput) -> ValidatorResult(ValidUser, String) {
   valid.build2(ValidUser)
-  |> valid.validate(user.name, valid.is_some("Please provide a name"))
-  |> valid.validate(user.age, valid.int_min(13, "Must be at least 13 years old"))
+  |> valid.check(user.name, valid.is_some("Please provide a name"))
+  |> valid.check(user.age, valid.int_min(13, "Must be at least 13 years old"))
 }
 ```
 
@@ -59,8 +59,8 @@ type Error {
 
 fn user_valid(user: UserInput) -> ValidatorResult(ValidUser, String) {
   valid.build2(ValidUser)
-  |> valid.validate(user.name, valid.is_some(ErrorEmptyName))
-  |> valid.validate(user.age, valid.int_min(13, ErrorTooYoung))
+  |> valid.check(user.name, valid.is_some(ErrorEmptyName))
+  |> valid.check(user.age, valid.int_min(13, ErrorTooYoung))
 }
 ```
 
@@ -71,11 +71,12 @@ fn user_valid(user: UserInput) -> ValidatorResult(ValidUser, String) {
 The `Ok` branch has the valid output.
 
 The `Error` branch has a tuple `tuple(error, List(error))`.
+
 The first value is the first error. The second value is a list with all errors (including the first).
 
 ## Validators
 
-See the [API Docs](https://hexdocs.pm/valid/) for the list of included valids.
+See the [API Docs](https://hexdocs.pm/valid/) for the list of included validators.
 
 ## Custom property validator
 
@@ -103,7 +104,27 @@ let custom = valid.custom("Must be bigger than 10", bigger_than_10)
 
 let valid = fn(form: FormInput) {
   valid.build1(ValidForm)
-  |> valid.validate(form.quantity, custom)
+  |> valid.check(form.quantity, custom)
+}
+```
+
+## Validating a Dictionary
+
+Use `required_in_dict` and `optional_in_dict`
+
+```gleam
+fn user_validator(dictionary: Dict(String, String)) {
+  valid.build2(ValidUser)
+  |> valid.check(
+    dictionary,
+    valid.required_in_dict("name", "Missing name")
+      |> valid.and_string_is_not_empty("Please provide a name"),
+  )
+  |> valid.check(
+    input,
+    valid.optional_in_dict("age")
+      |> valid.and_optional(valid.string_is_int("Please provide a valid number")),
+  )
 }
 ```
 
