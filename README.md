@@ -81,7 +81,7 @@ The first value is the first error. The second value is a list with all errors (
 
 ## Validators
 
-See the [API Docs](https://hexdocs.pm/gleam_validator/) for the list of included validators.
+See the [API Docs](https://hexdocs.pm/valid/) for the list of included validators.
 
 ## Custom property validator
 
@@ -116,20 +116,3 @@ let validator = fn(form: FormInput) {
 ## Examples
 
 See [the tests](https://github.com/sporto/gleam-validator/blob/main/test/valid_test.gleam) for many examples
-
-## Test
-
-```sh
-rebar3 compile
-rebar3 eunit
-```
-
-## Installation
-
-This package can be installed by adding `gleam_validator` to your `rebar.config` dependencies:
-
-```erlang
-{deps, [
-    gleam_validator
-]}.
-```
