@@ -2,8 +2,7 @@ import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleeunit
 import gleeunit/should
-import valid
-import valid/vcommon.{type Validator, type ValidatorResult}
+import valid.{type Validator, type ValidatorResult}
 
 type InputUser {
   InputUser(name: Option(String), email: Option(String), age: Int)

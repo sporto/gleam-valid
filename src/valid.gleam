@@ -6,7 +6,21 @@ import gleam/option.{type Option, None, Some}
 import gleam/regex
 import gleam/result
 import gleam/string
-import valid/vcommon.{type Errors, type Validator, type ValidatorResult}
+
+/// Error type returned by the validator.
+///
+/// This is a # with the first error and a list of all errors.
+/// The list includes the first error.
+pub type Errors(error) =
+  #(error, List(error))
+
+pub type ValidatorResult(output, error) =
+  Result(output, Errors(error))
+
+/// A Validator is a function that takes an input and
+/// returns a ValidatorResult
+pub type Validator(input, output, error) =
+  fn(input) -> ValidatorResult(output, error)
 
 fn curry2(constructor: fn(a, b) -> value) {
   fn(a) { fn(b) { constructor(a, b) } }
@@ -163,8 +177,17 @@ pub fn keep(
 ///		v.build1(Person)
 ///		|> v.validate(person.name, v.custom("Not Sam", must_be_sam))
 ///	}
-pub fn custom(error, check) {
-  vcommon.custom(error, check)
+pub fn custom(
+  error: e,
+  check: fn(input) -> Option(output),
+) -> Validator(input, output, e) {
+  fn(input: input) -> Result(output, Errors(e)) {
+    case check(input) {
+      Some(output) -> Ok(output)
+
+      None -> Error(#(error, [error]))
+    }
+  }
 }
 
 /// Compose validators
@@ -177,9 +200,9 @@ pub fn custom(error, check) {
 ///	let name_validator = v_string.is_not_empty("Empty")
 ///	|> v.and(v_string.min_length("Must be at least six", 6))
 pub fn and(
-  validator1: vcommon.Validator(i, mid, e),
-  validator2: vcommon.Validator(mid, o, e),
-) -> vcommon.Validator(i, o, e) {
+  validator1: Validator(i, mid, e),
+  validator2: Validator(mid, o, e),
+) -> Validator(i, o, e) {
   fn(input: i) {
     validator1(input)
     |> result.then(validator2)
@@ -207,9 +230,7 @@ pub fn and(
 ///		v.build1(person)
 ///		|> v.validate(person.name, name_validator)
 ///	}
-pub fn all(
-  validators: List(vcommon.Validator(io, io, e)),
-) -> vcommon.Validator(io, io, e) {
+pub fn all(validators: List(Validator(io, io, e))) -> Validator(io, io, e) {
   fn(input: io) -> Result(io, Errors(e)) {
     let results =
       validators
@@ -278,7 +299,7 @@ fn int_min_check(min: Int) {
 }
 
 pub fn int_min(error: e, min: Int) {
-  vcommon.custom(error, int_min_check(min))
+  custom(error, int_min_check(min))
 }
 
 fn int_max_check(max: Int) {
@@ -292,7 +313,7 @@ fn int_max_check(max: Int) {
 }
 
 pub fn int_max(error: e, max: Int) {
-  vcommon.custom(error, int_max_check(max))
+  custom(error, int_max_check(max))
 }
 
 /// String checks
@@ -306,12 +327,12 @@ fn string_is_not_empty_check(value: String) -> Option(String) {
 
 /// Validate if a string is not empty
 pub fn string_is_not_empty(error: e) {
-  vcommon.custom(error, string_is_not_empty_check)
+  custom(error, string_is_not_empty_check)
 }
 
 /// Validate if a string parses to an Int. Returns the Int if so.
 pub fn string_is_int(error: e) {
-  vcommon.custom(error, fn(value) {
+  custom(error, fn(value) {
     int.parse(value)
     |> option.from_result
   })
@@ -319,7 +340,7 @@ pub fn string_is_int(error: e) {
 
 /// Validate if a string parses to an Float. Returns the Float if so.
 pub fn string_is_float(error: e) {
-  vcommon.custom(error, fn(value) {
+  custom(error, fn(value) {
     float.parse(value)
     |> option.from_result
   })
@@ -344,7 +365,7 @@ fn string_is_email_check(value: String) -> Option(String) {
 ///
 /// This checks if a string follows a simple pattern `_@_`.
 pub fn string_is_email(error: e) {
-  vcommon.custom(error, string_is_email_check)
+  custom(error, string_is_email_check)
 }
 
 fn string_min_length_check(min: Int) {
@@ -360,7 +381,7 @@ fn string_min_length_check(min: Int) {
 
 /// Validate the min length of a string
 pub fn string_min_length(error: e, min: Int) {
-  vcommon.custom(error, string_min_length_check(min))
+  custom(error, string_min_length_check(min))
 }
 
 fn string_max_length_check(max: Int) {
@@ -376,7 +397,7 @@ fn string_max_length_check(max: Int) {
 
 /// Validate the max length of a string
 pub fn string_max_length(error: e, max: Int) {
-  vcommon.custom(error, string_max_length_check(max))
+  custom(error, string_max_length_check(max))
 }
 
 /// List checks
@@ -391,7 +412,7 @@ fn list_is_not_empty_check(value: List(a)) -> Option(List(a)) {
 
 /// Validate that a list is not empty
 pub fn list_is_not_empty(error: error) {
-  vcommon.custom(error, list_is_not_empty_check)
+  custom(error, list_is_not_empty_check)
 }
 
 fn list_min_length_check(min: Int) {
@@ -406,7 +427,7 @@ fn list_min_length_check(min: Int) {
 
 /// Validate the min number of items in a list
 pub fn list_min_length(error: error, min: Int) {
-  vcommon.custom(error, list_min_length_check(min))
+  custom(error, list_min_length_check(min))
 }
 
 fn list_max_length_check(max: Int) {
@@ -421,7 +442,7 @@ fn list_max_length_check(max: Int) {
 
 /// Validate the max number of items in a list
 pub fn list_max_length(error: error, max: Int) {
-  vcommon.custom(error, list_max_length_check(max))
+  custom(error, list_max_length_check(max))
 }
 
 /// Validate a list of items.
@@ -491,7 +512,7 @@ fn is_some_check(maybe: Option(value)) -> Option(value) {
 ///	}
 ///
 pub fn is_some(error: e) -> Validator(Option(i), i, e) {
-  vcommon.custom(error, is_some_check)
+  custom(error, is_some_check)
 }
 
 /// Validate an optional value.
