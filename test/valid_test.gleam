@@ -138,33 +138,37 @@ fn user_dict_validator(
   let get_email = fn(d) { dict.get(d, "email") |> option.from_result }
 
   valid.build4(ValidUser)
-  |> valid.validate_required_in_dict(
-    from: input,
-    get: "name",
-    missing: "Missing name",
-    validator: valid.string_is_not_empty("Please provide a name"),
-  )
-  |> valid.validate_required(
+  |> valid.validate(
     input,
-    get_email,
-    "Missing email",
-    valid.string_is_email("Please provide an email"),
+    valid.required_in_dict("name", "Missing name")
+      |> valid.and(valid.string_is_not_empty("Please provide a name")),
   )
-  |> valid.validate_required_in_dict(
+  |> valid.validate(
     input,
-    "age",
-    "Missing age",
-    valid.string_is_int("Please provide an age"),
+    valid.required_in(get_email, "Missing Email")
+      |> valid.and(valid.string_is_email("Please provide an email")),
   )
-  |> valid.validate_optional_in_dict(
+  |> valid.validate(
     input,
-    "balance",
-    valid.string_is_int("Please provide a valid number"),
+    valid.required_in_dict("age", "Missing age")
+      |> valid.and(valid.string_is_int("Please provide an age")),
+  )
+  |> valid.validate(
+    input,
+    valid.optional_in_dict("weight")
+      |> valid.and(
+        valid.optional(valid.string_is_int("Please provide a valid number")),
+      ),
   )
 }
 
 pub fn get_and_validate_test() {
-  let values = [#("name", "Sam"), #("email", "sam@sample.com"), #("age", "18")]
+  let values = [
+    #("name", "Sam"),
+    #("email", "sam@sample.com"),
+    #("age", "18"),
+    #("weight", "20"),
+  ]
   let values_dict = dict.from_list(values)
 
   let valid =
