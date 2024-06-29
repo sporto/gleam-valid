@@ -1,11 +1,9 @@
-import gleam/function
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleeunit
 import gleeunit/should
 import valid
 import valid/vcommon.{type Validator, type ValidatorResult}
-import valid/voption
 
 type InputUser {
   InputUser(name: Option(String), email: Option(String), age: Int)
@@ -49,8 +47,8 @@ pub fn main() {
 
 fn user_validator(user: InputUser) -> ValidatorResult(ValidUser, String) {
   valid.build3(ValidUser)
-  |> valid.validate(user.name, voption.is_some("Please provide a name"))
-  |> valid.validate(user.email, voption.is_some("Please provide an email"))
+  |> valid.validate(user.name, valid.is_some("Please provide a name"))
+  |> valid.validate(user.email, valid.is_some("Please provide an email"))
   |> valid.keep(user.age)
 }
 
@@ -141,7 +139,7 @@ pub fn and_test() {
 
 pub fn and_with_transformation_test() {
   let name_validator =
-    voption.is_some("Is null")
+    valid.is_some("Is null")
     |> valid.and(valid.string_is_not_empty("Empty"))
     |> valid.and(valid.string_min_length("More", 3))
     |> valid.and(valid.string_max_length("Less", 8))
@@ -184,7 +182,7 @@ pub fn all_test() {
 
 pub fn compose_and_all_test() {
   let name_validator =
-    voption.is_some("Is null")
+    valid.is_some("Is null")
     |> valid.and(
       valid.all([
         valid.string_is_not_empty("Empty"),
@@ -321,7 +319,7 @@ pub fn list_all_test() {
 }
 
 pub fn option_is_some_test() {
-  let validator = voption.is_some("Null")
+  let validator = valid.is_some("Null")
 
   validator(Some("Hola"))
   |> should.equal(Ok("Hola"))
@@ -333,7 +331,7 @@ pub fn option_is_some_test() {
 }
 
 pub fn option_optional_test() {
-  let validator = voption.optional(valid.string_min_length("Short", 3))
+  let validator = valid.optional(valid.string_min_length("Short", 3))
 
   validator(None)
   |> should.equal(Ok(None))
@@ -428,7 +426,7 @@ pub fn string_max_length_test() {
 pub fn nested_test() {
   let thing_validator = fn(thing: InputThing) {
     valid.build1(Thing)
-    |> valid.validate(thing.name, voption.is_some("Is null"))
+    |> valid.validate(thing.name, valid.is_some("Is null"))
   }
 
   let things_validator = valid.list_every(thing_validator)
