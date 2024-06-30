@@ -213,13 +213,13 @@ pub fn required_in_dict(key: String, error: e) {
 ///   )
 ///	}
 ///
-pub fn required_in(get: fn(input) -> Option(a), error: e) {
-  custom(fn(input) {
+pub fn required_in(get: fn(a) -> Option(b), error: e) -> Validator(a, b, e) {
+  fn(input: a) {
     case get(input) {
-      None -> Error(error)
+      None -> Error(non_empty_new(error, []))
       Some(a) -> Ok(a)
     }
-  })
+  }
 }
 
 pub fn optional_in_dict(key: String) {
@@ -256,35 +256,6 @@ pub fn keep(
   value: value,
 ) -> Result(next_accumulator, NonEmptyList(e)) {
   check(accumulator, value, ok())
-}
-
-/// Create a custom validator
-///
-/// A custom validator has two attributes:
-///
-/// - The error
-/// - A check function
-///
-/// The check function is a function that takes an `input` and returns `Option(output)`
-///
-/// ## Example
-///
-///	let must_be_sam = fn(name: String) -> Option(String) {
-///		case name == "Sam" {
-///			True -> Some(name)
-///			False -> None
-///		}
-///	}
-///
-///	let validator = fn(person: Person) {
-///		valid.build1(Person)
-///		|> valid.check(person.name, valid.custom("Not Sam", must_be_sam))
-///	}
-pub fn custom(check: Check(in, out, e)) -> Validator(in, out, e) {
-  fn(input: in) -> ValidatorResult(out, e) {
-    check(input)
-    |> result.map_error(error_to_errors)
-  }
 }
 
 /// A validator that always succeeds
@@ -382,6 +353,7 @@ pub fn whole(
   })
 }
 
+// TODO test
 pub fn check_only(
   accumulator: Result(fn(out) -> next_accumulator, NonEmptyList(e)),
   input: in,
@@ -395,160 +367,126 @@ pub fn check_only(
 }
 
 /// Integer checks
-fn int_min_check(min: Int, error: e) -> Check(Int, Int, e) {
+pub fn int_min(min: Int, error: e) -> Validator(Int, Int, e) {
   fn(value: Int) {
     case value < min {
-      True -> Error(error)
+      True -> Error(non_empty_new(error, []))
       False -> Ok(value)
     }
   }
 }
 
-pub fn int_min(min: Int, error: e) {
-  custom(int_min_check(min, error))
-}
-
-fn int_max_check(max: Int, error: e) -> Check(Int, Int, e) {
+pub fn int_max(max: Int, error: e) -> Validator(Int, Int, e) {
   fn(value: Int) {
     case value > max {
-      True -> Error(error)
+      True -> Error(non_empty_new(error, []))
       False -> Ok(value)
     }
   }
-}
-
-pub fn int_max(max: Int, error: e) {
-  custom(int_max_check(max, error))
 }
 
 /// String checks
-fn string_is_not_empty_check(error: e) -> Check(String, String, e) {
+///
+/// Validate that a string is not empty
+pub fn string_is_not_empty(error: e) -> Validator(String, String, e) {
   fn(value: String) {
     case string.is_empty(value) {
-      True -> Error(error)
+      True -> Error(non_empty_new(error, []))
       False -> Ok(value)
     }
   }
 }
 
-/// Validate if a string is not empty
-pub fn string_is_not_empty(error: e) {
-  custom(string_is_not_empty_check(error))
-}
-
 /// Validate if a string parses to an Int. Returns the Int if so.
-pub fn string_is_int(error: e) {
-  custom(fn(value) {
+pub fn string_is_int(error: e) -> Validator(String, Int, e) {
+  fn(value: String) {
     int.parse(value)
-    |> result.replace_error(error)
-  })
+    |> result.replace_error(non_empty_new(error, []))
+  }
 }
 
 /// Validate if a string parses to an Float. Returns the Float if so.
-pub fn string_is_float(error: e) {
-  custom(fn(value) {
-    float.parse(value)
-    |> result.replace_error(error)
-  })
-}
-
-fn string_is_email_check(error: e) -> Check(String, String, e) {
+pub fn string_is_float(error: e) -> Validator(String, Float, e) {
   fn(value: String) {
-    let pattern = "^[\\w\\d]+@[\\w\\d\\.]+$"
-
-    case regex.from_string(pattern) {
-      Ok(re) -> {
-        case regex.check(with: re, content: value) {
-          True -> Ok(value)
-          False -> Error(error)
-        }
-      }
-      Error(_) -> Error(error)
-    }
+    float.parse(value)
+    |> result.replace_error(non_empty_new(error, []))
   }
 }
 
 /// Validate if a string is an email.
 ///
 /// This checks if a string follows a simple pattern `_@_`.
-pub fn string_is_email(error: e) {
-  custom(string_is_email_check(error))
-}
-
-fn string_min_length_check(min: Int, error: e) -> Check(String, String, e) {
+pub fn string_is_email(error: e) -> Validator(String, String, e) {
   fn(value: String) {
-    let len = string.length(value)
+    let errors = non_empty_new(error, [])
+    let pattern = "^[\\w\\d]+@[\\w\\d\\.]+$"
 
-    case len < min {
-      True -> Error(error)
-      False -> Ok(value)
+    case regex.from_string(pattern) {
+      Ok(re) -> {
+        case regex.check(with: re, content: value) {
+          True -> Ok(value)
+          False -> Error(errors)
+        }
+      }
+      Error(_) -> Error(errors)
     }
   }
 }
 
 /// Validate the min length of a string
-pub fn string_min_length(min: Int, error: e) {
-  custom(string_min_length_check(min, error))
-}
-
-fn string_max_length_check(max: Int, error: e) -> Check(String, String, e) {
+pub fn string_min_length(min: Int, error: e) -> Validator(String, String, e) {
   fn(value: String) {
     let len = string.length(value)
 
-    case len > max {
-      True -> Error(error)
+    case len < min {
+      True -> Error(non_empty_new(error, []))
       False -> Ok(value)
     }
   }
 }
 
 /// Validate the max length of a string
-pub fn string_max_length(max: Int, error: e) {
-  custom(string_max_length_check(max, error))
-}
+pub fn string_max_length(max: Int, error: e) -> Validator(String, String, e) {
+  fn(value: String) {
+    let len = string.length(value)
 
-/// List checks
-///
-fn list_is_not_empty_check(error: e) -> Check(List(a), List(a), e) {
-  fn(value: List(a)) {
-    case list.is_empty(value) {
-      True -> Error(error)
+    case len > max {
+      True -> Error(non_empty_new(error, []))
       False -> Ok(value)
     }
   }
 }
 
+/// List checks
+///
 /// Validate that a list is not empty
-pub fn list_is_not_empty(error: e) {
-  custom(list_is_not_empty_check(error))
-}
-
-fn list_min_length_check(min: Int, error: e) {
-  fn(value: List(a)) -> Result(List(a), e) {
-    case list.length(value) < min {
-      True -> Error(error)
+pub fn list_is_not_empty(error: e) -> Validator(List(a), List(a), e) {
+  fn(value: List(a)) {
+    case list.is_empty(value) {
+      True -> Error(non_empty_new(error, []))
       False -> Ok(value)
     }
   }
 }
 
 /// Validate the min number of items in a list
-pub fn list_min_length(min: Int, error: e) {
-  custom(list_min_length_check(min, error))
-}
-
-fn list_max_length_check(max: Int, error: e) {
-  fn(value: List(a)) -> Result(List(a), e) {
-    case list.length(value) > max {
-      True -> Error(error)
+pub fn list_min_length(min: Int, error: e) -> Validator(List(a), List(a), e) {
+  fn(value: List(a)) {
+    case list.length(value) < min {
+      True -> Error(non_empty_new(error, []))
       False -> Ok(value)
     }
   }
 }
 
 /// Validate the max number of items in a list
-pub fn list_max_length(max: Int, error: e) {
-  custom(list_max_length_check(max, error))
+pub fn list_max_length(max: Int, error: e) -> Validator(List(a), List(a), e) {
+  fn(value: List(a)) {
+    case list.length(value) > max {
+      True -> Error(non_empty_new(error, []))
+      False -> Ok(value)
+    }
+  }
 }
 
 /// Validate a list of items.
@@ -580,15 +518,6 @@ pub fn list_every(validator: Validator(input, output, error)) {
 
 /// Option checks
 ///
-fn is_some_check(error: e) -> Check(Option(a), a, e) {
-  fn(option: Option(a)) -> Result(a, e) {
-    case option {
-      None -> Error(error)
-      Some(value) -> Ok(value)
-    }
-  }
-}
-
 /// Validate that a value is not None.
 /// Returns the value if Some.
 ///
@@ -603,8 +532,13 @@ fn is_some_check(error: e) -> Check(Option(a), a, e) {
 ///		|> valid.check(person.name, valid.is_some("Name is null"))
 ///	}
 ///
-pub fn is_some(error: e) -> Validator(Option(i), i, e) {
-  custom(is_some_check(error))
+pub fn is_some(error: e) -> Validator(Option(a), a, e) {
+  fn(option: Option(a)) {
+    case option {
+      None -> Error(non_empty_new(error, []))
+      Some(value) -> Ok(value)
+    }
+  }
 }
 
 /// Validate an optional value.
