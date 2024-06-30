@@ -9,6 +9,7 @@
 ### Changed
 
 - Renamed `and` to `then`
+- Renamed `optional` to `if_some`
 - Return errors as `NonEmptyList`
 - Type `Check` signature, they should return a `Result(out, error)` now
 - Validator builders now take the error as last argument

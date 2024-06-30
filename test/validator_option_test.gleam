@@ -1,4 +1,5 @@
 import gleam/function
+import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleeunit/should
 import valid
@@ -16,7 +17,7 @@ pub fn is_some_test() {
 }
 
 pub fn optional_test() {
-  let validator = valid.optional(valid.string_min_length(3, "Short"))
+  let validator = valid.if_some(valid.string_min_length(3, "Short"))
 
   validator(None)
   |> should.equal(Ok(None))
@@ -31,7 +32,7 @@ pub fn optional_test() {
 }
 
 pub fn optional_different_type_test() {
-  let validator = valid.optional(valid.string_is_int("Not Int"))
+  let validator = valid.if_some(valid.string_is_int("Not Int"))
 
   validator(None)
   |> should.equal(Ok(None))
@@ -46,21 +47,11 @@ pub fn optional_different_type_test() {
 }
 
 pub fn optional_in_test() {
-  let validator = valid.optional_in(function.identity)
+  let validator = valid.optional_in(list.first)
 
-  validator(None)
+  validator([])
   |> should.equal(Ok(None))
 
-  validator(Some(1))
+  validator([1])
   |> should.equal(Ok(Some(1)))
-}
-
-pub fn required_in_test() {
-  let validator = valid.required_in(function.identity, "Absent")
-
-  validator(None)
-  |> should.equal(Error(valid.non_empty_new("Absent", [])))
-
-  validator(Some(1))
-  |> should.equal(Ok(1))
 }

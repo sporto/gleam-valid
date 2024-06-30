@@ -1,3 +1,4 @@
+import gleam/function
 import gleam/string
 import gleeunit/should
 import valid
@@ -45,4 +46,14 @@ pub fn keep_test() {
 
   validator(user)
   |> should.equal(Ok(user))
+}
+
+pub fn required_in_test() {
+  let validator = valid.required_in(function.identity, "Absent")
+
+  validator(Error(""))
+  |> should.equal(Error(valid.non_empty_new("Absent", [])))
+
+  validator(Ok(1))
+  |> should.equal(Ok(1))
 }

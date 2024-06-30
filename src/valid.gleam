@@ -182,44 +182,34 @@ pub fn required_in_dict(
   key: String,
   error: e,
 ) -> Validator(Dict(String, a), a, e) {
-  let fun = fn(dictionary) {
-    dict.get(dictionary, key)
-    |> option.from_result
-  }
-  required_in(fun, error)
+  required_in(dict.get(_, key), error)
 }
 
 /// Validate an attribute required in a data type
 /// Here you provide your own accessor
-/// The accessor should return `Option(attribute)`
+/// The accessor should return a `Result`
 ///
 /// ## Example
 ///
 /// See <test/validator_option_test.gleam>
 ///
-pub fn required_in(get: fn(a) -> Option(b), error: e) -> Validator(a, b, e) {
+pub fn required_in(get: fn(a) -> Result(b, re), error: e) -> Validator(a, b, e) {
   fn(input: a) {
-    case get(input) {
-      None -> Error(non_empty_new(error, []))
-      Some(a) -> Ok(a)
-    }
+    get(input)
+    |> result.replace_error(non_empty_new(error, []))
   }
 }
 
-pub fn optional_in_dict(key: String) {
-  let fun = fn(dictionary) {
-    dict.get(dictionary, key)
-    |> option.from_result
-  }
-  optional_in(fun)
+pub fn optional_in_dict(key: key) -> Validator(Dict(key, val), Option(val), e) {
+  optional_in(dict.get(_, key))
 }
 
-pub fn optional_in(get: fn(input) -> Option(a)) {
+pub fn optional_in(
+  get: fn(input) -> Result(a, re),
+) -> Validator(input, Option(a), e) {
   fn(input: input) {
-    case get(input) {
-      Some(a) -> Ok(Some(a))
-      None -> Ok(None)
-    }
+    let option = get(input) |> option.from_result
+    Ok(option)
   }
 }
 
@@ -488,7 +478,7 @@ pub fn is_some(error: e) -> Validator(Option(a), a, e) {
 ///
 /// See <test/validator_option_test.gleam
 ///
-pub fn optional(
+pub fn if_some(
   validator: Validator(a, b, error),
 ) -> Validator(Option(a), Option(b), error) {
   fn(maybe_a: Option(a)) {
@@ -504,3 +494,18 @@ pub fn optional(
     }
   }
 }
+// pub fn if_ok(
+//   validator: Validator(a, b, error),
+// ) -> Validator(Result(a, ae), Result(b, ae), error) {
+//   fn(result: Result(a, ae)) {
+//     case result {
+//       Error(ae) -> Ok(Error(ae))
+//       Ok(a) -> {
+//         case validator(a) {
+//           Ok(b) -> Ok(Ok(b))
+//           Error(error) -> Error(error)
+//         }
+//       }
+//     }
+//   }
+// }

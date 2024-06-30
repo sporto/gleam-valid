@@ -10,7 +10,7 @@ type ValidUser {
 fn user_dict_validator(
   input: Dict(String, String),
 ) -> ValidatorResult(ValidUser, String) {
-  let get_email = fn(d) { dict.get(d, "email") |> option.from_result }
+  let get_email = dict.get(_, "email")
 
   valid.build4(ValidUser)
   |> valid.check(
@@ -32,7 +32,7 @@ fn user_dict_validator(
     input,
     valid.optional_in_dict("weight")
       |> valid.then(
-        valid.optional(valid.string_is_int("Please provide a valid number")),
+        valid.if_some(valid.string_is_int("Please provide a valid number")),
       ),
   )
 }
