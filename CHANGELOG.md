@@ -8,9 +8,10 @@
 
 ### Changed
 
-- Type `Check` signature, they should return a `Result(out, error)` now
+- Renamed `and` to `then`
 - Return errors as `NonEmptyList`
-- Validator now take the error as last argument
+- Type `Check` signature, they should return a `Result(out, error)` now
+- Validator builders now take the error as last argument
 
 ### Removed
 

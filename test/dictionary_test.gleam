@@ -16,22 +16,22 @@ fn user_dict_validator(
   |> valid.check(
     input,
     valid.required_in_dict("name", "Missing name")
-      |> valid.and(valid.string_is_not_empty("Please provide a name")),
+      |> valid.then(valid.string_is_not_empty("Please provide a name")),
   )
   |> valid.check(
     input,
     valid.required_in(get_email, "Missing Email")
-      |> valid.and(valid.string_is_email("Please provide an email")),
+      |> valid.then(valid.string_is_email("Please provide an email")),
   )
   |> valid.check(
     input,
     valid.required_in_dict("age", "Missing age")
-      |> valid.and(valid.string_is_int("Please provide an age")),
+      |> valid.then(valid.string_is_int("Please provide an age")),
   )
   |> valid.check(
     input,
     valid.optional_in_dict("weight")
-      |> valid.and(
+      |> valid.then(
         valid.optional(valid.string_is_int("Please provide a valid number")),
       ),
   )

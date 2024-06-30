@@ -176,17 +176,12 @@ pub fn check(
 ///
 /// ## Example
 ///
-///	let validator = fn(dictionary: Dict(String, String)) {
-///		valid.build1(Person)
-///		|> valid.check_required_in_dict(
-///     from: dictionary,
-///     get: "name",
-///     missing: "Missing name",
-///     validator: valid.string_is_not_empty(ErrorEmpty)
-///   )
-///	}
+/// See <test/dictionary_test.gleam>
 ///
-pub fn required_in_dict(key: String, error: e) {
+pub fn required_in_dict(
+  key: String,
+  error: e,
+) -> Validator(Dict(String, a), a, e) {
   let fun = fn(dictionary) {
     dict.get(dictionary, key)
     |> option.from_result
@@ -194,24 +189,13 @@ pub fn required_in_dict(key: String, error: e) {
   required_in(fun, error)
 }
 
-/// Validate an attribute required in an arbitrary data type
+/// Validate an attribute required in a data type
 /// Here you provide your own accessor
-/// The accessor should return `Option(property)`
+/// The accessor should return `Option(attribute)`
 ///
 /// ## Example
 ///
-/// let get_name = fn(d) { dict.get(d, "name") |> option.from_result }
-///
-///	let validator = fn(dictionary: Dict(String, String)) {
-///		valid.build1(Person)
-///		|> valid.check(
-///     dictionary,
-///     required_in(get_name, "Missing name")
-///       |> valid.and(
-///         valid.string_is_not_empty(ErrorEmpty)
-///       )
-///   )
-///	}
+/// See <test/validator_option_test.gleam>
 ///
 pub fn required_in(get: fn(a) -> Option(b), error: e) -> Validator(a, b, e) {
   fn(input: a) {
@@ -239,15 +223,11 @@ pub fn optional_in(get: fn(input) -> Option(a)) {
   }
 }
 
-/// Keep a value as is.
+/// Keep a value as is
 ///
 /// ## Example
 ///
-///	fn person_validor(person: Person) {
-///		valid.build2(Person)
-///			|> valid.check(person.name, ...)
-///			|> valid.keep(person.age)
-///	}
+/// See <test/check_other_test.gleam
 ///
 pub fn keep(
   accumulator: Result(fn(value) -> next_accumulator, NonEmptyList(e)),
@@ -264,13 +244,13 @@ pub fn ok() -> Validator(io, io, e) {
 /// Compose validators
 ///
 /// Run the first validator and if successful then the second.
-/// Only returns the first error.
+/// This short circuits, so only returns the first error.
 ///
 /// ## Example
 ///
-///	let name_validator = valid.string_is_not_empty("Empty")
-///	|> valid.and(valid.string_min_length("Must be at least six", 6))
-pub fn and(
+/// See <test/composition_test.gleam>
+///
+pub fn then(
   validator1: Validator(i, mid, e),
   validator2: Validator(mid, o, e),
 ) -> Validator(i, o, e) {
@@ -287,20 +267,12 @@ pub fn and(
 /// All these validators must have the same input and output types.
 ///
 /// Returns Ok when all validators pass.
-/// Returns Error when any validator fails. Error will have all failures.
+/// Returns Error when any validator fails. The error will have all failures.
 ///
 /// ## Example
 ///
-///	let name_validator = valid.all([
-///		valid.string_is_not_empty("Empty"),
-///		valid.string_min_length(">=3", 3),
-///		valid.string_max_length("<=10", 10)
-///	])
+/// See <test/composition_test.gleam>
 ///
-///	let validator = fn(person: Person) {
-///		valid.build1(person)
-///		|> valid.check(person.name, name_validator)
-///	}
 pub fn all(validators: List(Validator(in, in, e))) -> Validator(in, in, e) {
   fn(input: in) -> ValidatorResult(in, e) {
     list.fold(over: validators, from: Ok(input), with: fn(acc, validator) {
@@ -476,16 +448,8 @@ pub fn list_max_length(max: Int, error: e) -> Validator(List(a), List(a), e) {
 ///
 /// ## Example
 ///
-///	type Collection = { Collection(items: List(String) ) }
+/// See <test/composition_test.gleam
 ///
-///	let list_validator = valid.list_every(
-///		valid.string_min_length("Must be at least 3", 3)
-///	)
-///
-///	let validator = fn(collection: Collection) {
-///		valid.build1(Collection)
-///		|> valid.check(collection.items, list_validator)
-///	}
 pub fn list_every(validator: Validator(input, output, error)) {
   fn(inputs: List(input)) {
     list.fold(over: inputs, from: Ok([]), with: fn(acc, input) {
@@ -504,14 +468,7 @@ pub fn list_every(validator: Validator(input, output, error)) {
 ///
 /// ## Example
 ///
-///	type PersonInput { PersonInput(name: Option(String)) }
-///
-///	type PersonValid { PersonValid(name: String) }
-///
-///	let validator = fn(person) {
-///		valid.build1(PersonValid)
-///		|> valid.check(person.name, valid.is_some("Name is null"))
-///	}
+/// See <test/validator_option_test.gleam
 ///
 pub fn is_some(error: e) -> Validator(Option(a), a, e) {
   fn(option: Option(a)) {
@@ -529,17 +486,7 @@ pub fn is_some(error: e) -> Validator(Option(a), a, e) {
 ///
 /// ## Example
 ///
-/// type PersonValid{
-///   PersonValid(name: Option(String))
-/// }
-///
-///	let validator = fn(person) {
-///		valid.build1(PersonValid)
-///		|> valid.check(
-///			person.name,
-///			valid.optional(valid.string_min_length("Short", 3))
-///		)
-///	}
+/// See <test/validator_option_test.gleam
 ///
 pub fn optional(
   validator: Validator(a, b, error),

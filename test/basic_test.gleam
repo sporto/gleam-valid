@@ -38,17 +38,3 @@ pub fn invalid_test() {
   user_validator(invalid)
   |> should.equal(expected_error)
 }
-
-pub fn keep_test() {
-  let validator = fn(user: ValidUser) {
-    valid.build3(ValidUser)
-    |> valid.keep(user.name)
-    |> valid.keep(user.email)
-    |> valid.keep(user.age)
-  }
-
-  let user = ValidUser(name: "Sam", email: "email", age: 18)
-
-  validator(user)
-  |> should.equal(Ok(user))
-}

@@ -2,11 +2,11 @@ import gleam/option.{type Option, None, Some}
 import gleeunit/should
 import valid
 
-pub fn and_test() {
+pub fn then_test() {
   let validator =
     valid.string_is_not_empty("Empty")
-    |> valid.and(valid.string_min_length(6, "More"))
-    |> valid.and(valid.string_max_length(2, "Less"))
+    |> valid.then(valid.string_min_length(6, "More"))
+    |> valid.then(valid.string_max_length(2, "Less"))
 
   let expected_error = Error(valid.non_empty_new("More", []))
 
@@ -17,9 +17,9 @@ pub fn and_test() {
 pub fn and_with_transformation_test() {
   let validator =
     valid.is_some("Is null")
-    |> valid.and(valid.string_is_not_empty("Empty"))
-    |> valid.and(valid.string_min_length(3, "More"))
-    |> valid.and(valid.string_max_length(8, "Less"))
+    |> valid.then(valid.string_is_not_empty("Empty"))
+    |> valid.then(valid.string_min_length(3, "More"))
+    |> valid.then(valid.string_max_length(8, "Less"))
 
   let expected_error = Error(valid.non_empty_new("Less", []))
 
@@ -46,7 +46,7 @@ pub fn all_test() {
 pub fn compose_and_all_test() {
   let validator =
     valid.is_some("Is null")
-    |> valid.and(
+    |> valid.then(
       valid.all([
         valid.string_is_not_empty("Empty"),
         valid.string_min_length(3, ">=3"),
