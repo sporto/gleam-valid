@@ -1,4 +1,5 @@
 import gleeunit/should
+import non_empty_list
 import valid.{type ValidatorResult}
 
 type Character {
@@ -9,7 +10,7 @@ fn whole_validator(c: Character) -> ValidatorResult(Character, String) {
   let error = "Strength cannot be less than level"
 
   case c.level > c.strength {
-    True -> Error(valid.non_empty_new(error, []))
+    True -> Error(non_empty_list.new(error, []))
     False -> Ok(c)
   }
 }
@@ -34,6 +35,6 @@ pub fn whole_test() {
 
   character_validator(char2)
   |> should.equal(
-    Error(valid.non_empty_new("Strength cannot be less than level", [])),
+    Error(non_empty_list.new("Strength cannot be less than level", [])),
   )
 }

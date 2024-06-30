@@ -1,5 +1,6 @@
 import gleam/option.{type Option, None, Some}
 import gleeunit/should
+import non_empty_list
 import valid
 
 pub fn then_test() {
@@ -8,7 +9,7 @@ pub fn then_test() {
     |> valid.then(valid.string_min_length(6, "More"))
     |> valid.then(valid.string_max_length(2, "Less"))
 
-  let expected_error = Error(valid.non_empty_new("More", []))
+  let expected_error = Error(non_empty_list.new("More", []))
 
   validator("One")
   |> should.equal(expected_error)
@@ -21,7 +22,7 @@ pub fn and_with_transformation_test() {
     |> valid.then(valid.string_min_length(3, "More"))
     |> valid.then(valid.string_max_length(8, "Less"))
 
-  let expected_error = Error(valid.non_empty_new("Less", []))
+  let expected_error = Error(non_empty_list.new("Less", []))
 
   validator(Some("One Thing"))
   |> should.equal(expected_error)
@@ -37,7 +38,7 @@ pub fn all_test() {
       valid.string_max_length(10, "<=10"),
     ])
 
-  let expected_error = Error(valid.non_empty_new(">=3", [">=4", ">=5"]))
+  let expected_error = Error(non_empty_list.new(">=3", [">=4", ">=5"]))
 
   validator("1")
   |> should.equal(expected_error)
@@ -54,7 +55,7 @@ pub fn compose_and_all_test() {
       ]),
     )
 
-  let expected_error = Error(valid.non_empty_new("<=10", []))
+  let expected_error = Error(non_empty_list.new("<=10", []))
 
   validator(Some("One thing after the other"))
   |> should.equal(expected_error)
@@ -111,7 +112,7 @@ pub fn nested_test() {
       UserInput(name: Some("Three")),
     ])
 
-  let expected_error = Error(valid.non_empty_new("Is null", []))
+  let expected_error = Error(non_empty_list.new("Is null", []))
 
   validator(input_col_2)
   |> should.equal(expected_error)

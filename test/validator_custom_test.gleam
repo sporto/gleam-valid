@@ -1,4 +1,5 @@
 import gleeunit/should
+import non_empty_list
 import valid.{type NonEmptyList, type ValidatorResult}
 
 type Thing {
@@ -8,7 +9,7 @@ type Thing {
 fn must_be_one(name: String) -> ValidatorResult(String, String) {
   case name == "One" {
     True -> Ok(name)
-    False -> Error(valid.non_empty_new("Must be One", []))
+    False -> Error(non_empty_list.new("Must be One", []))
   }
 }
 
@@ -21,7 +22,7 @@ pub fn custom_test() {
   validator(Thing("One"))
   |> should.equal(Ok(Thing("One")))
 
-  let expected_error = Error(valid.non_empty_new("Must be One", []))
+  let expected_error = Error(non_empty_list.new("Must be One", []))
 
   validator(Thing("Two"))
   |> should.equal(expected_error)

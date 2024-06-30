@@ -6,15 +6,12 @@ import gleam/option.{type Option, None, Some}
 import gleam/regex
 import gleam/result
 import gleam/string
+import non_empty_list
 
 /// A non empty list.
 /// Errors returned by a validator are returned in this format.
-pub type NonEmptyList(a) {
-  NonEmptyList(first: a, rest: List(a))
-}
-
-pub type Check(input, output, error) =
-  fn(input) -> Result(output, error)
+pub type NonEmptyList(a) =
+  non_empty_list.NonEmptyList(a)
 
 pub type ValidatorResult(output, error) =
   Result(output, NonEmptyList(error))
@@ -60,27 +57,10 @@ fn add_errors(
   case result {
     Ok(_) -> Error(errors)
     Error(existing_errors) -> {
-      let next_errors = non_empty_append(existing_errors, errors)
+      let next_errors = non_empty_list.append(existing_errors, errors)
       Error(next_errors)
     }
   }
-}
-
-/// Construct a NonEmptyList
-pub fn non_empty_new(first: a, rest: List(a)) -> NonEmptyList(a) {
-  NonEmptyList(first, rest)
-}
-
-fn non_empty_append(
-  first: NonEmptyList(a),
-  second: NonEmptyList(a),
-) -> NonEmptyList(a) {
-  non_empty_new(first.first, list.append(first.rest, non_empty_to_list(second)))
-}
-
-/// Transform NonEmptyList into a List
-pub fn non_empty_to_list(non_empty: NonEmptyList(a)) -> List(a) {
-  [non_empty.first, ..non_empty.rest]
 }
 
 /// Build a validator for a type that has one attribute
@@ -191,7 +171,7 @@ pub fn required_in_dict(
 pub fn required_in(get: fn(a) -> Result(b, re), error: e) -> Validator(a, b, e) {
   fn(input: a) {
     get(input)
-    |> result.replace_error(non_empty_new(error, []))
+    |> result.replace_error(non_empty_list.new(error, []))
   }
 }
 
@@ -314,7 +294,7 @@ pub fn check_only(
 pub fn int_min(min: Int, error: e) -> Validator(Int, Int, e) {
   fn(value: Int) {
     case value < min {
-      True -> Error(non_empty_new(error, []))
+      True -> Error(non_empty_list.new(error, []))
       False -> Ok(value)
     }
   }
@@ -323,7 +303,7 @@ pub fn int_min(min: Int, error: e) -> Validator(Int, Int, e) {
 pub fn int_max(max: Int, error: e) -> Validator(Int, Int, e) {
   fn(value: Int) {
     case value > max {
-      True -> Error(non_empty_new(error, []))
+      True -> Error(non_empty_list.new(error, []))
       False -> Ok(value)
     }
   }
@@ -335,7 +315,7 @@ pub fn int_max(max: Int, error: e) -> Validator(Int, Int, e) {
 pub fn string_is_not_empty(error: e) -> Validator(String, String, e) {
   fn(value: String) {
     case string.is_empty(value) {
-      True -> Error(non_empty_new(error, []))
+      True -> Error(non_empty_list.new(error, []))
       False -> Ok(value)
     }
   }
@@ -345,7 +325,7 @@ pub fn string_is_not_empty(error: e) -> Validator(String, String, e) {
 pub fn string_is_int(error: e) -> Validator(String, Int, e) {
   fn(value: String) {
     int.parse(value)
-    |> result.replace_error(non_empty_new(error, []))
+    |> result.replace_error(non_empty_list.new(error, []))
   }
 }
 
@@ -353,7 +333,7 @@ pub fn string_is_int(error: e) -> Validator(String, Int, e) {
 pub fn string_is_float(error: e) -> Validator(String, Float, e) {
   fn(value: String) {
     float.parse(value)
-    |> result.replace_error(non_empty_new(error, []))
+    |> result.replace_error(non_empty_list.new(error, []))
   }
 }
 
@@ -362,7 +342,7 @@ pub fn string_is_float(error: e) -> Validator(String, Float, e) {
 /// This checks if a string follows a simple pattern `_@_`.
 pub fn string_is_email(error: e) -> Validator(String, String, e) {
   fn(value: String) {
-    let errors = non_empty_new(error, [])
+    let errors = non_empty_list.new(error, [])
     let pattern = "^[\\w\\d]+@[\\w\\d\\.]+$"
 
     case regex.from_string(pattern) {
@@ -383,7 +363,7 @@ pub fn string_min_length(min: Int, error: e) -> Validator(String, String, e) {
     let len = string.length(value)
 
     case len < min {
-      True -> Error(non_empty_new(error, []))
+      True -> Error(non_empty_list.new(error, []))
       False -> Ok(value)
     }
   }
@@ -395,7 +375,7 @@ pub fn string_max_length(max: Int, error: e) -> Validator(String, String, e) {
     let len = string.length(value)
 
     case len > max {
-      True -> Error(non_empty_new(error, []))
+      True -> Error(non_empty_list.new(error, []))
       False -> Ok(value)
     }
   }
@@ -407,7 +387,7 @@ pub fn string_max_length(max: Int, error: e) -> Validator(String, String, e) {
 pub fn list_is_not_empty(error: e) -> Validator(List(a), List(a), e) {
   fn(value: List(a)) {
     case list.is_empty(value) {
-      True -> Error(non_empty_new(error, []))
+      True -> Error(non_empty_list.new(error, []))
       False -> Ok(value)
     }
   }
@@ -417,7 +397,7 @@ pub fn list_is_not_empty(error: e) -> Validator(List(a), List(a), e) {
 pub fn list_min_length(min: Int, error: e) -> Validator(List(a), List(a), e) {
   fn(value: List(a)) {
     case list.length(value) < min {
-      True -> Error(non_empty_new(error, []))
+      True -> Error(non_empty_list.new(error, []))
       False -> Ok(value)
     }
   }
@@ -427,7 +407,7 @@ pub fn list_min_length(min: Int, error: e) -> Validator(List(a), List(a), e) {
 pub fn list_max_length(max: Int, error: e) -> Validator(List(a), List(a), e) {
   fn(value: List(a)) {
     case list.length(value) > max {
-      True -> Error(non_empty_new(error, []))
+      True -> Error(non_empty_list.new(error, []))
       False -> Ok(value)
     }
   }
@@ -464,7 +444,7 @@ pub fn list_every(validator: Validator(input, output, error)) {
 pub fn is_some(error: e) -> Validator(Option(a), a, e) {
   fn(option: Option(a)) {
     case option {
-      None -> Error(non_empty_new(error, []))
+      None -> Error(non_empty_list.new(error, []))
       Some(value) -> Ok(value)
     }
   }

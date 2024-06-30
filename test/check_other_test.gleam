@@ -1,5 +1,6 @@
 import gleam/string
 import gleeunit/should
+import non_empty_list
 import valid
 
 type ValidUser {
@@ -12,7 +13,7 @@ pub fn check_only_test() {
   let name_and_email_validator = fn(input: ValidUser) {
     case string.contains(input.email, input.name) {
       True -> Ok(input)
-      False -> Error(valid.non_empty_new(name_and_email_error, []))
+      False -> Error(non_empty_list.new(name_and_email_error, []))
     }
   }
 
@@ -31,7 +32,7 @@ pub fn check_only_test() {
   let user_2 = ValidUser(name: "julia", email: "sam@sample.com")
 
   user_validator(user_2)
-  |> should.equal(Error(valid.non_empty_new(name_and_email_error, [])))
+  |> should.equal(Error(non_empty_list.new(name_and_email_error, [])))
 }
 
 pub fn keep_test() {

@@ -1,4 +1,5 @@
 import gleeunit/should
+import non_empty_list
 import valid
 
 pub fn int_min_test() {
@@ -7,7 +8,7 @@ pub fn int_min_test() {
   validator(5)
   |> should.equal(Ok(5))
 
-  let expected_error = Error(valid.non_empty_new(">=5", []))
+  let expected_error = Error(non_empty_list.new(">=5", []))
 
   validator(4)
   |> should.equal(expected_error)
@@ -19,7 +20,7 @@ pub fn int_max_test() {
   validator(5)
   |> should.equal(Ok(5))
 
-  let expected_error = Error(valid.non_empty_new("<=5", []))
+  let expected_error = Error(non_empty_list.new("<=5", []))
 
   validator(6)
   |> should.equal(expected_error)

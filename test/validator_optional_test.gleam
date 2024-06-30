@@ -1,6 +1,7 @@
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleeunit/should
+import non_empty_list
 import valid
 
 pub fn is_some_test() {
@@ -9,7 +10,7 @@ pub fn is_some_test() {
   validator(Some("Hola"))
   |> should.equal(Ok("Hola"))
 
-  let expected_error = Error(valid.non_empty_new("Null", []))
+  let expected_error = Error(non_empty_list.new("Null", []))
 
   validator(None)
   |> should.equal(expected_error)
@@ -24,7 +25,7 @@ pub fn optional_test() {
   validator(Some("abc"))
   |> should.equal(Ok(Some("abc")))
 
-  let expected_error = Error(valid.non_empty_new("Short", []))
+  let expected_error = Error(non_empty_list.new("Short", []))
 
   validator(Some("a"))
   |> should.equal(expected_error)
@@ -39,7 +40,7 @@ pub fn optional_different_type_test() {
   validator(Some("1"))
   |> should.equal(Ok(Some(1)))
 
-  let expected_error = Error(valid.non_empty_new("Not Int", []))
+  let expected_error = Error(non_empty_list.new("Not Int", []))
 
   validator(Some("a"))
   |> should.equal(expected_error)

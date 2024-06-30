@@ -1,5 +1,6 @@
 import gleam/list
 import gleeunit/should
+import non_empty_list
 import valid
 
 pub fn string_not_empty_test() {
@@ -8,7 +9,7 @@ pub fn string_not_empty_test() {
   validator("One")
   |> should.equal(Ok("One"))
 
-  let expected_error = Error(valid.non_empty_new("Empty", []))
+  let expected_error = Error(non_empty_list.new("Empty", []))
 
   validator("")
   |> should.equal(expected_error)
@@ -20,7 +21,7 @@ pub fn string_is_int_test() {
   validator("1")
   |> should.equal(Ok(1))
 
-  let expected_error = Error(valid.non_empty_new("NaN", []))
+  let expected_error = Error(non_empty_list.new("NaN", []))
 
   validator("A")
   |> should.equal(expected_error)
@@ -32,7 +33,7 @@ pub fn string_is_float_test() {
   validator("1.1")
   |> should.equal(Ok(1.1))
 
-  let expected_error = Error(valid.non_empty_new("NaN", []))
+  let expected_error = Error(non_empty_list.new("NaN", []))
 
   validator("A")
   |> should.equal(expected_error)
@@ -47,7 +48,7 @@ pub fn string_is_email_test() {
     |> should.equal(Ok(email))
   })
 
-  let expected_error = Error(valid.non_empty_new("Not email", []))
+  let expected_error = Error(non_empty_list.new("Not email", []))
 
   ["", "a", "a@", "@b"]
   |> list.map(fn(email) {
@@ -62,7 +63,7 @@ pub fn string_min_length_test() {
   validator("One")
   |> should.equal(Ok("One"))
 
-  let expected_error = Error(valid.non_empty_new("Less than 3", []))
+  let expected_error = Error(non_empty_list.new("Less than 3", []))
 
   validator("Tw")
   |> should.equal(expected_error)
@@ -74,7 +75,7 @@ pub fn string_max_length_test() {
   validator("Hello")
   |> should.equal(Ok("Hello"))
 
-  let expected_error = Error(valid.non_empty_new("More than 5", []))
+  let expected_error = Error(non_empty_list.new("More than 5", []))
 
   validator("More than five")
   |> should.equal(expected_error)

@@ -1,5 +1,6 @@
 import gleam/option.{type Option, None, Some}
 import gleeunit/should
+import non_empty_list
 import valid.{type ValidatorResult}
 
 type InputUser {
@@ -32,7 +33,7 @@ pub fn invalid_test() {
 
   let expected_error =
     Error(
-      valid.non_empty_new("Please provide a name", ["Please provide an email"]),
+      non_empty_list.new("Please provide a name", ["Please provide an email"]),
     )
 
   user_validator(invalid)

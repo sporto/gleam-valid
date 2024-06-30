@@ -1,4 +1,5 @@
 import gleeunit/should
+import non_empty_list
 import valid
 
 type User {
@@ -17,7 +18,7 @@ fn validator(user: User) {
 pub fn error_type_test() {
   let user = User("")
 
-  let expected_error = Error(valid.non_empty_new(ErrorEmpty, []))
+  let expected_error = Error(non_empty_list.new(ErrorEmpty, []))
 
   validator(user)
   |> should.equal(expected_error)

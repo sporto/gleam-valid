@@ -4,8 +4,10 @@
 packages = [
   { name = "gleam_stdlib", version = "0.36.0", build_tools = ["gleam"], requirements = [], otp_app = "gleam_stdlib", source = "hex", outer_checksum = "C0D14D807FEC6F8A08A7C9EF8DFDE6AE5C10E40E21325B2B29365965D82EB3D4" },
   { name = "gleeunit", version = "1.0.2", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "gleeunit", source = "hex", outer_checksum = "D364C87AFEB26BDB4FB8A5ABDE67D635DC9FA52D6AB68416044C35B096C6882D" },
+  { name = "non_empty_list", version = "1.1.1", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "non_empty_list", source = "hex", outer_checksum = "35FA1A6EF3407A13E2A98046465AB107417F7A47992F0BA42D11BD7B3F8AE4BE" },
 ]
 
 [requirements]
 gleam_stdlib = { version = "~> 0.36" }
 gleeunit = { version = "~> 1.0" }
+non_empty_list = { version = ">= 1.0.0 and < 2.0.0" }

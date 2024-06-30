@@ -1,5 +1,11 @@
 # Changelog
 
+### 4.1.0
+
+### Changed
+
+- Use sub dependency `non_empty_list`
+
 ### 4.0.0
 
 ### Added

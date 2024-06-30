@@ -1,6 +1,7 @@
 import gleam/dict.{type Dict}
 import gleam/option.{type Option, None, Some}
 import gleeunit/should
+import non_empty_list
 import valid.{type ValidatorResult}
 
 type ValidUser {
@@ -57,7 +58,7 @@ pub fn required_in_dict_test() {
   let validator = valid.required_in_dict("name", "Absent")
 
   validator(dict.new())
-  |> should.equal(Error(valid.non_empty_new("Absent", [])))
+  |> should.equal(Error(non_empty_list.new("Absent", [])))
 
   validator([#("name", "sam")] |> dict.from_list)
   |> should.equal(Ok("sam"))
