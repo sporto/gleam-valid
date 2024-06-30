@@ -34,11 +34,11 @@ gleam add valid
 
 ### Validators
 
-- For string validators, see <test/check_string_test.gleam>
-- For int validators, see <test/check_int_test.gleam>
-- For list validators, see <test/check_list_test.gleam>
-- For optional validators, see <test/check_option_test.gleam>
-- For creating a custom validator, see <test/check_custom_test.gleam>
+- For string validators, see <test/validator_string_test.gleam>
+- For int validators, see <test/validator_int_test.gleam>
+- For list validators, see <test/validator_list_test.gleam>
+- For optional validators, see <test/validator_option_test.gleam>
+- For creating a custom validator, see <test/validator_custom_test.gleam>
 
 ### Composition
 

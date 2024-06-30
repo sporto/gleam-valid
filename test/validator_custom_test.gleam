@@ -1,11 +1,11 @@
 import gleeunit/should
-import valid.{type NonEmptyList}
+import valid.{type NonEmptyList, type ValidatorResult}
 
 type Thing {
   Thing(name: String)
 }
 
-fn must_be_one(name: String) -> Result(String, NonEmptyList(String)) {
+fn must_be_one(name: String) -> ValidatorResult(String, String) {
   case name == "One" {
     True -> Ok(name)
     False -> Error(valid.non_empty_new("Must be One", []))

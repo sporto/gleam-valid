@@ -1,27 +1,27 @@
 import gleeunit/should
-import valid
+import valid.{type ValidatorResult}
 
 type Character {
   Character(level: Int, strength: Int)
 }
 
-fn character_validator(c: Character) {
-  let whole_validator = fn(c: Character) {
-    let error = "Strength cannot be less than level"
+fn whole_validator(c: Character) -> ValidatorResult(Character, String) {
+  let error = "Strength cannot be less than level"
 
-    case c.level > c.strength {
-      True -> Error(valid.non_empty_new(error, []))
-      False -> Ok(c)
-    }
+  case c.level > c.strength {
+    True -> Error(valid.non_empty_new(error, []))
+    False -> Ok(c)
   }
+}
 
+fn character_validator(c: Character) -> ValidatorResult(Character, String) {
   valid.build2(Character)
   |> valid.check(c.level, valid.int_min(1, "Level must be more that zero"))
   |> valid.check(
     c.strength,
     valid.int_min(1, "Strength must be more that zero"),
   )
-  |> valid.whole(whole_validator)
+  |> valid.check_whole(whole_validator)
 }
 
 pub fn whole_test() {

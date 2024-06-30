@@ -1,4 +1,3 @@
-import gleam/function
 import gleam/option.{type Option, None, Some}
 import gleeunit/should
 import valid.{type ValidatorResult}

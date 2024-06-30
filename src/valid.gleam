@@ -239,8 +239,6 @@ pub fn optional_in(get: fn(input) -> Option(a)) {
   }
 }
 
-// TODO simplify
-///
 /// Keep a value as is.
 ///
 /// ## Example
@@ -316,32 +314,14 @@ pub fn all(validators: List(Validator(in, in, e))) -> Validator(in, in, e) {
   }
 }
 
-/// Validate a resulting type as a whole.
+/// Validate the resulting type as a whole.
 ///
 /// Sometimes we need to validate a property in relation to another.
-/// This validator must be at the end of the pipeline.
+/// This validator must be at the end of the pipeline, so it receives the final type.
 ///
-/// This function requires a check function like:
+/// For example see <test/check_whole_test.gleam>
 ///
-///	fn(a) -> Result(a, error)
-///
-/// ## Example
-///
-///	let strengh_and_level_validator = fn(c: Character) {
-///		case c.level > c.strength {
-///			True -> Error(error)
-///			False -> Ok(c)
-///		}
-///	}
-///
-///	let validator = fn(c: Character) {
-///		valid.build2(Character)
-///		|> valid.check(c.level, valid.int_min("Level must be more that zero", 1))
-///		|> valid.check(c.strength, valid.int_min("Strength must be more that zero", 1))
-///		|> valid.whole(c, strengh_and_level_validator)
-///	}
-///
-pub fn whole(
+pub fn check_whole(
   accumulator: Result(in, NonEmptyList(e)),
   validator: Validator(in, out, e),
 ) {
@@ -353,7 +333,8 @@ pub fn whole(
   })
 }
 
-// TODO test
+/// Performs a validation, but discards the resulting type.
+/// So the resulting type is not passed to the final constructor.
 pub fn check_only(
   accumulator: Result(fn(out) -> next_accumulator, NonEmptyList(e)),
   input: in,
