@@ -1,4 +1,3 @@
-import gleam/function
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleeunit/should
