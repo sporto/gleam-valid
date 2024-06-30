@@ -191,7 +191,7 @@ pub fn required_in_dict(
 ///
 /// ## Example
 ///
-/// See <test/validator_option_test.gleam>
+/// See <test/validator_required_test.gleam>
 ///
 pub fn required_in(get: fn(a) -> Result(b, re), error: e) -> Validator(a, b, e) {
   fn(input: a) {
@@ -200,6 +200,12 @@ pub fn required_in(get: fn(a) -> Result(b, re), error: e) -> Validator(a, b, e) 
   }
 }
 
+/// Validate an optional attribute in a dict
+///
+/// ## Example
+///
+/// See <test/validator_optional_test.gleam>
+///
 pub fn optional_in_dict(key: key) -> Validator(Dict(key, val), Option(val), e) {
   optional_in(dict.get(_, key))
 }
@@ -476,7 +482,7 @@ pub fn is_some(error: e) -> Validator(Option(a), a, e) {
 ///
 /// ## Example
 ///
-/// See <test/validator_option_test.gleam
+/// See <test/validator_optional_test.gleam>
 ///
 pub fn if_some(
   validator: Validator(a, b, error),
