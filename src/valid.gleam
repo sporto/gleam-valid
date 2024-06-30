@@ -66,11 +66,6 @@ fn add_errors(
   }
 }
 
-// Change a single error to a list of errors
-fn error_to_errors(error: e) -> NonEmptyList(e) {
-  non_empty_new(error, [])
-}
-
 /// Construct a NonEmptyList
 pub fn non_empty_new(first: a, rest: List(a)) -> NonEmptyList(a) {
   NonEmptyList(first, rest)
