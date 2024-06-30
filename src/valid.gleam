@@ -1,6 +1,5 @@
 import gleam/dict.{type Dict}
 import gleam/float
-import gleam/function
 import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
