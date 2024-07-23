@@ -1,9 +1,9 @@
 name = "valid"
-version = "4.1.1"
+version = "4.1.2"
 
-description = "A validation library for gleam"
+description = "A composable validation library for gleam"
 licences = ["MIT"]
-repository = { type = "github", user = "sporto", repo = "gleam-validator" }
+repository = { type = "github", user = "sporto", repo = "gleam-valid" }
 
 
 [dependencies]
