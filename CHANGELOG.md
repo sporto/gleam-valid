@@ -1,5 +1,11 @@
 # Changelog
 
+### 4.2.0
+
+### Changed
+
+- Email validation accepts `+` and `.` in the suffix
+
 ### 4.1.0
 
 ### Changed
