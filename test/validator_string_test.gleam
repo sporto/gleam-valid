@@ -43,8 +43,8 @@ pub fn string_is_email_test() {
   let validator = valid.string_is_email("Not email")
 
   [
-    "a@b", "a1@b", "a1@b.com", "a1@b.com.au", "a.b@b.com", "a.b.c@b.com",
-    "a+b@b.com",
+    "a@b", "a1@b", "a1@b.com", "a1@b.com.au", "a.b@b.com", "aa.aa@a.com",
+    "a.b.c@b.com", "a+b@b.com", "aa+bb@b.com",
   ]
   |> list.map(fn(email) {
     validator(email)
