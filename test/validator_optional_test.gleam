@@ -1,5 +1,5 @@
 import gleam/list
-import gleam/option.{type Option, None, Some}
+import gleam/option.{None, Some}
 import gleeunit/should
 import non_empty_list
 import valid

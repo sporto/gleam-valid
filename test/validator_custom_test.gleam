@@ -1,6 +1,6 @@
 import gleeunit/should
 import non_empty_list
-import valid.{type NonEmptyList, type ValidatorResult}
+import valid.{type ValidatorResult}
 
 type Thing {
   Thing(name: String)

@@ -42,7 +42,10 @@ pub fn string_is_float_test() {
 pub fn string_is_email_test() {
   let validator = valid.string_is_email("Not email")
 
-  ["a@b", "a1@b", "a1@b.com", "a1@b.com.au", "firstname.lastname@b.com"]
+  [
+    "a@b", "a1@b", "a1@b.com", "a1@b.com.au", "a.b@b.com", "a.b.c@b.com",
+    "a+b@b.com",
+  ]
   |> list.map(fn(email) {
     validator(email)
     |> should.equal(Ok(email))
@@ -50,7 +53,7 @@ pub fn string_is_email_test() {
 
   let expected_error = Error(non_empty_list.new("Not email", []))
 
-  ["", "a", "a@", "@b", ".@b", "a.a.a@b.com"]
+  ["", "a", "a@", "@b", ".@b", "+@b"]
   |> list.map(fn(email) {
     validator(email)
     |> should.equal(expected_error)
