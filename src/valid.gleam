@@ -344,7 +344,7 @@ pub fn string_is_email(error: e) -> Validator(String, String, e) {
   fn(value: String) {
     let errors = non_empty_list.new(error, [])
 
-    let pattern = "^([\\w\\d]+)(\\.[\\w\\d])*(\\+[\\w\\d])?@[\\w\\d\\.]+$"
+    let pattern = "^([\\w\\d]+)(\\.[\\w\\d]+)*(\\+[\\w\\d]+)?@[\\w\\d\\.]+$"
 
     case regex.from_string(pattern) {
       Ok(re) -> {
