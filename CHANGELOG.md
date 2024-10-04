@@ -1,5 +1,9 @@
 # Changelog
 
+### 4.2.1
+
+- Fixed issue with email regex https://github.com/sporto/gleam-valid/pull/4
+
 ### 4.2.0
 
 ### Changed
