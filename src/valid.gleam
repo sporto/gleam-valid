@@ -3,7 +3,7 @@ import gleam/float
 import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
-import gleam/regex
+import gleam/regexp
 import gleam/result
 import gleam/string
 import non_empty_list
@@ -346,9 +346,9 @@ pub fn string_is_email(error: e) -> Validator(String, String, e) {
 
     let pattern = "^([\\w\\d]+)(\\.[\\w\\d]+)*(\\+[\\w\\d]+)?@[\\w\\d\\.]+$"
 
-    case regex.from_string(pattern) {
+    case regexp.from_string(pattern) {
       Ok(re) -> {
-        case regex.check(with: re, content: value) {
+        case regexp.check(with: re, content: value) {
           True -> Ok(value)
           False -> Error(errors)
         }
