@@ -1,4 +1,5 @@
 import gleam/option.{None, Some}
+import gleam/string
 import gleeunit/should
 import valid/experimental as valid
 
@@ -32,6 +33,37 @@ pub fn invalid_test() {
   input
   |> valid.validate(user_validator)
   |> should.equal(Error(["Age", "Name", "Email"]))
+}
+
+pub fn all_test() {
+  let string_contains = fn(wanted) {
+    fn(input) {
+      case string.contains(input, wanted) {
+        True -> #(input, [])
+        False -> #("", [wanted])
+      }
+    }
+  }
+
+  let validator = fn(input: String) {
+    use out <- valid.check(
+      input,
+      valid.all([string_contains("$"), string_contains("*")]),
+    )
+    valid.ok(out)
+  }
+
+  "*$"
+  |> valid.validate(validator)
+  |> should.equal(Ok("*$"))
+
+  "*"
+  |> valid.validate(validator)
+  |> should.equal(Error(["$"]))
+
+  "Hello"
+  |> valid.validate(validator)
+  |> should.equal(Error(["$", "*"]))
 }
 
 pub fn custom_validator_test() {

@@ -14,7 +14,43 @@ import gleam/string
 /// When the errors list is empty, the validation is considered
 /// successful.
 pub type Validator(input, output, e) =
-  fn(input) -> #(output, List(e))
+  fn(input) -> ValidatorResult(output, e)
+
+/// The result of a validator
+pub type ValidatorResult(output, e) =
+  #(output, List(e))
+
+/// Validate a value using a list of validators.
+/// This runs all the validators in the list.
+///
+/// The initial input is passed to all validators.
+/// All these validators must have the same input and output types.
+/// If all the validators succeed, this will return the original input.
+///
+/// The returned errors contain all the failures.
+///
+/// e.g.
+/// ```gleam
+/// fn validator(input: String) {
+///   use password <- valid.check(
+///     input,
+///     valid.all([password_has_numbers, password_has_symbols]),
+///   )
+///
+///   valid.ok(out)
+/// }
+/// ```
+pub fn all(validators: List(Validator(in, in, e))) -> Validator(in, in, e) {
+  fn(input: in) -> ValidatorResult(in, e) {
+    let all_errors =
+      list.flat_map(validators, fn(validator) {
+        let #(_, errors) = validator(input)
+        errors
+      })
+
+    #(input, all_errors)
+  }
+}
 
 /// Add a field validator to the validator pipeline
 ///
