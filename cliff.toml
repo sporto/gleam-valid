@@ -1,0 +1,7 @@
+[git]
+commit_parsers = [
+  { message = "^feat", group = "Features" },
+  { message = "^fix", group = "Bug Fixes" },
+]
+# filter out the commits that are not matched by commit parsers
+filter_commits = true
