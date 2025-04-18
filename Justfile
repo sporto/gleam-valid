@@ -1,3 +1,6 @@
+changelog:
+  git cliff --output CHANGELOG.md
+
 test:
 	gleam test
 

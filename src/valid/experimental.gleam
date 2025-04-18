@@ -280,8 +280,8 @@ pub fn then(first_validator first_validator, second_validator second_validator) 
 ///
 /// ```gleam
 /// fn name_validator(input) {
-/// 	use name <- valid.check(input, valid.string_min_length(2, "Min 2"))
-/// 	valid.ok(name)
+///   use name <- valid.check(input, valid.string_min_length(2, "Min 2"))
+///   valid.ok(name)
 /// }
 ///
 /// let result = "Sally"
