@@ -1,3 +1,9 @@
+## [4.5.0] - 2025-04-18
+
+### Features
+
+- Add `all` validator
+
 ## [4.4.0] - 2025-04-18
 
 ### Features
