@@ -1,493 +1,341 @@
-import gleam/dict.{type Dict}
 import gleam/float
 import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/regexp
-import gleam/result
 import gleam/string
-import non_empty_list
 
-/// A non empty list.
-/// Errors returned by a validator are returned in this format.
-pub type NonEmptyList(a) =
-  non_empty_list.NonEmptyList(a)
+/// A validator is a function that takes an input
+/// and returns a tuple of `#(output, errors)`.
+///
+/// A validator always need to return an output of
+/// the desired type. So default values are used for this.
+///
+/// When the errors list is empty, the validation is considered
+/// successful.
+pub type Validator(input, output, e) =
+  fn(input) -> ValidatorResult(output, e)
 
-pub type ValidatorResult(output, error) =
-  Result(output, NonEmptyList(error))
-
-/// A Validator is a function that takes an input and
-/// returns a ValidatorResult
-pub type Validator(input, output, error) =
-  fn(input) -> ValidatorResult(output, error)
-
-/// Internal Utility
-///
-fn curry2(constructor: fn(a, b) -> value) {
-  fn(a) { fn(b) { constructor(a, b) } }
-}
-
-fn curry3(constructor: fn(a, b, c) -> value) {
-  fn(a) { fn(b) { fn(c) { constructor(a, b, c) } } }
-}
-
-fn curry4(constructor: fn(a, b, c, d) -> value) {
-  fn(a) { fn(b) { fn(c) { fn(d) { constructor(a, b, c, d) } } } }
-}
-
-fn curry5(constructor: fn(a, b, c, d, e) -> value) {
-  fn(a) { fn(b) { fn(c) { fn(d) { fn(e) { constructor(a, b, c, d, e) } } } } }
-}
-
-fn curry6(constructor: fn(a, b, c, d, e, f) -> value) {
-  fn(a) {
-    fn(b) {
-      fn(c) { fn(d) { fn(e) { fn(f) { constructor(a, b, c, d, e, f) } } } }
-    }
-  }
-}
-
-// Add errors to result
-// If result was ok then it becomes Err(errors)
-// If result already has errors, then append new errors
-fn add_errors(
-  result: Result(a, NonEmptyList(e)),
-  errors: NonEmptyList(e),
-) -> Result(b, NonEmptyList(e)) {
-  case result {
-    Ok(_) -> Error(errors)
-    Error(existing_errors) -> {
-      let next_errors = non_empty_list.append(existing_errors, errors)
-      Error(next_errors)
-    }
-  }
-}
-
-/// Build a validator for a type that has one attribute
-///
-/// ## Example
-///
-///	type Person { Person(name: String) }
-///
-///	let validator = fn(person: Person) {
-///		valid.build1(person)
-///		|> valid.check(person.name, name_validator)
-///	}
-pub fn build1(constructor) {
-  Ok(constructor)
-}
-
-/// Build a validator for a type that has two attributes
-///
-/// ## Example
-///
-///	type Person { Person(name: String, age: Int) }
-///
-///	let validator = fn(person: Person) {
-///		valid.build2(person)
-///		|> valid.check(person.name, name_validator)
-///		|> valid.check(person.age, ...)
-///	}
-pub fn build2(constructor) {
-  Ok(curry2(constructor))
-}
-
-/// Build a validator for a type that has three attributes
-///
-/// ## Example
-///
-///	type Person { Person(name: String, age: Int, email: String) }
-///
-///	let validator = fn(person: Person) {
-///		valid.build3(person)
-///		|> valid.check(person.name, name_validator)
-///		|> valid.check(person.age, ...)
-///		|> valid.check(person.email, ...)
-///	}
-pub fn build3(constructor) {
-  Ok(curry3(constructor))
-}
-
-/// Build a validator for a type that has four attributes
-pub fn build4(constructor) {
-  Ok(curry4(constructor))
-}
-
-/// Build a validator for a type that has five attributes
-pub fn build5(constructor) {
-  Ok(curry5(constructor))
-}
-
-/// Build a validator for a type that has six attributes
-pub fn build6(constructor) {
-  Ok(curry6(constructor))
-}
-
-/// Validate an attribute.
-///
-/// ## Example
-///
-///	let validator = fn(person: Person) {
-///		valid.build1(Person)
-///		|> valid.check(person.name, valid.string_is_not_empty(ErrorEmpty))
-///	}
-///
-pub fn check(
-  accumulator: Result(fn(out) -> next_constructor, NonEmptyList(e)),
-  input: in,
-  validator: Validator(in, out, e),
-) -> Result(next_constructor, NonEmptyList(e)) {
-  case validator(input) {
-    Ok(out) ->
-      accumulator
-      |> result.map(fn(acc) { acc(out) })
-
-    Error(errors) -> add_errors(accumulator, errors)
-  }
-}
-
-/// Validate an attribute required in a dictionary
-/// If you have a dictionary instead of a custom type, use this.
-///
-/// ## Example
-///
-/// See <test/dictionary_test.gleam>
-///
-pub fn required_in_dict(
-  key: String,
-  error: e,
-) -> Validator(Dict(String, a), a, e) {
-  required_in(dict.get(_, key), error)
-}
-
-/// Validate an attribute required in a data type
-/// Here you provide your own accessor
-/// The accessor should return a `Result`
-///
-/// ## Example
-///
-/// See <test/validator_required_test.gleam>
-///
-pub fn required_in(get: fn(a) -> Result(b, re), error: e) -> Validator(a, b, e) {
-  fn(input: a) {
-    get(input)
-    |> result.replace_error(non_empty_list.new(error, []))
-  }
-}
-
-/// Validate an optional attribute in a dict
-///
-/// ## Example
-///
-/// See <test/validator_optional_test.gleam>
-///
-pub fn optional_in_dict(key: key) -> Validator(Dict(key, val), Option(val), e) {
-  optional_in(dict.get(_, key))
-}
-
-pub fn optional_in(
-  get: fn(input) -> Result(a, re),
-) -> Validator(input, Option(a), e) {
-  fn(input: input) {
-    let option = get(input) |> option.from_result
-    Ok(option)
-  }
-}
-
-/// Keep a value as is
-///
-/// ## Example
-///
-/// See <test/check_other_test.gleam
-///
-pub fn keep(
-  accumulator: Result(fn(value) -> next_accumulator, NonEmptyList(e)),
-  value: value,
-) -> Result(next_accumulator, NonEmptyList(e)) {
-  check(accumulator, value, ok())
-}
-
-/// A validator that always succeeds
-pub fn ok() -> Validator(io, io, e) {
-  Ok
-}
-
-/// Compose validators
-///
-/// Run the first validator and if successful then the second.
-/// This short circuits, so only returns the first error.
-///
-/// ## Example
-///
-/// See <test/composition_test.gleam>
-///
-pub fn then(
-  validator1: Validator(i, mid, e),
-  validator2: Validator(mid, o, e),
-) -> Validator(i, o, e) {
-  fn(input: i) {
-    validator1(input)
-    |> result.then(validator2)
-  }
-}
+/// The result of a validator
+pub type ValidatorResult(output, e) =
+  #(output, List(e))
 
 /// Validate a value using a list of validators.
 /// This runs all the validators in the list.
 ///
 /// The initial input is passed to all validators.
 /// All these validators must have the same input and output types.
+/// If all the validators succeed, this will return the original input.
 ///
-/// Returns Ok when all validators pass.
-/// Returns Error when any validator fails. The error will have all failures.
+/// The returned errors contain all the failures.
 ///
-/// ## Example
+/// e.g.
+/// ```gleam
+/// fn validator(input: String) {
+///   use password <- valid.check(
+///     input,
+///     valid.all([password_has_numbers, password_has_symbols]),
+///   )
 ///
-/// See <test/composition_test.gleam>
-///
+///   valid.ok(out)
+/// }
+/// ```
 pub fn all(validators: List(Validator(in, in, e))) -> Validator(in, in, e) {
   fn(input: in) -> ValidatorResult(in, e) {
-    list.fold(over: validators, from: Ok(input), with: fn(acc, validator) {
-      let res = validator(input)
+    let all_errors =
+      list.flat_map(validators, fn(validator) {
+        let #(_, errors) = validator(input)
+        errors
+      })
 
-      case res {
-        Ok(_) -> acc
-        Error(errors) -> add_errors(acc, errors)
-      }
-    })
+    #(input, all_errors)
   }
 }
 
-/// Validate the resulting type as a whole.
+/// Add a field validator to the validator pipeline
 ///
-/// Sometimes we need to validate a property in relation to another.
-/// This validator must be at the end of the pipeline, so it receives the final type.
-///
-/// For example see <test/check_whole_test.gleam>
-///
-pub fn check_whole(
-  accumulator: Result(in, NonEmptyList(e)),
-  validator: Validator(in, out, e),
+/// ```gleam
+/// fn validator(input: Int) {
+///   use out <- valid.check(input, valid.int_max(12, "Error"))
+///   valid.ok(out)
+/// }
+/// ```
+pub fn check(
+  input input: in,
+  validator validator: Validator(in, out, err),
+  next next,
 ) {
-  result.then(accumulator, fn(input: in) {
-    case validator(input) {
-      Ok(out) -> Ok(out)
-      Error(errors) -> add_errors(accumulator, errors)
-    }
-  })
+  // First we collect the errors for the current validator
+  let #(output, errors) = validator(input)
+
+  // Then we run the next validator
+  let #(next_output, next_errors) = next(output)
+
+  #(next_output, errors |> list.append(next_errors))
 }
 
-/// Performs a validation, but discards the resulting type.
-/// So the resulting type is not passed to the final constructor.
-pub fn check_only(
-  accumulator: Result(fn(out) -> next_accumulator, NonEmptyList(e)),
-  input: in,
-  validator: Validator(in, in, e),
-) {
-  // Run the validator, but discard the Ok result
-  case validator(input) {
-    Ok(_) -> accumulator
-    Error(errors) -> add_errors(accumulator, errors)
-  }
+/// A validator that fails with the given default and error.
+pub fn fail(default, error) {
+  #(default, [error])
 }
 
-/// Integer checks
-pub fn int_min(min: Int, error: e) -> Validator(Int, Int, e) {
-  fn(value: Int) {
-    case value < min {
-      True -> Error(non_empty_list.new(error, []))
-      False -> Ok(value)
-    }
-  }
-}
-
-pub fn int_max(max: Int, error: e) -> Validator(Int, Int, e) {
+/// e.g.
+///
+/// ```gleam
+/// fn validator(input) {
+///   use out <- valid.check(input, valid.int_max(12, "Cannot be higher than 12"))
+///   valid.ok(out)
+/// }
+/// ```
+pub fn int_max(max max: Int, error error: err) -> Validator(Int, Int, err) {
   fn(value: Int) {
     case value > max {
-      True -> Error(non_empty_list.new(error, []))
-      False -> Ok(value)
+      True -> #(0, [error])
+      False -> #(value, [])
     }
   }
 }
 
-/// String checks
+/// e.g.
 ///
-/// Validate that a string is not empty
-pub fn string_is_not_empty(error: e) -> Validator(String, String, e) {
-  fn(value: String) {
-    case string.is_empty(value) {
-      True -> Error(non_empty_list.new(error, []))
-      False -> Ok(value)
+/// ```gleam
+/// fn validator(input) {
+///   use out <- valid.check(input, valid.int_min(12, "Must be more than 12"))
+///   valid.ok(out)
+/// }
+/// ```
+pub fn int_min(min min: Int, error error: err) -> Validator(Int, Int, err) {
+  fn(value: Int) {
+    case value < min {
+      True -> #(0, [error])
+      False -> #(value, [])
     }
   }
 }
 
-/// Validate if a string parses to an Int. Returns the Int if so.
-pub fn string_is_int(error: e) -> Validator(String, Int, e) {
-  fn(value: String) {
-    int.parse(value)
-    |> result.replace_error(non_empty_list.new(error, []))
-  }
-}
-
-/// Validate if a string parses to an Float. Returns the Float if so.
-pub fn string_is_float(error: e) -> Validator(String, Float, e) {
-  fn(value: String) {
-    float.parse(value)
-    |> result.replace_error(non_empty_list.new(error, []))
-  }
-}
-
-/// Validate if a string is an email.
+/// Validate that a value is not None.
+/// The validator fails if None.
+/// Runs the nested validator when Some.
+/// This validator requires a `default` value to be provided.
 ///
+///
+/// ```gleam
+/// fn validator(input) {
+///   use out <- valid.check(input, valid.is_some("", valid.ok, "Input"))
+///   valid.ok(out)
+/// }
+/// ```
+pub fn is_some(
+  default default: out,
+  validator validator: Validator(in, out, err),
+  error error: err,
+) -> Validator(Option(in), out, err) {
+  fn(option: Option(in)) {
+    case option {
+      None -> #(default, [error])
+      Some(value) -> {
+        validator(value)
+      }
+    }
+  }
+}
+
+/// Runs the validator for each item in a list
+///
+///
+/// ```gleam
+/// fn validator(input) {
+///   use out <- valid.check(input, valid.list_all(valid.string_is_not_empty("Empty")))
+///   valid.ok(out)
+/// }
+/// ```
+pub fn list_all(validator validator: Validator(in, out, err)) {
+  fn(items) {
+    let initial = #([], [])
+
+    let accumulate = fn(acc, item) {
+      let #(acc_out, acc_errors) = acc
+      let #(output, errors) = validator(item)
+
+      let next_output =
+        acc_out
+        |> list.append([output])
+
+      let next_errors =
+        acc_errors
+        |> list.append(errors)
+
+      let next_tuple = #(next_output, next_errors)
+
+      case next_errors {
+        [] -> list.Continue(next_tuple)
+        _ -> list.Stop(next_tuple)
+      }
+    }
+
+    list.fold_until(from: initial, over: items, with: accumulate)
+  }
+}
+
+/// A validator that always succeeds
+pub fn ok(output) {
+  #(output, [])
+}
+
+/// Run a validator only when the value is Some
+/// Otherwise succeed with None
+pub fn optional(validator validator) {
+  fn(maybe_input: Option(input)) {
+    case maybe_input {
+      None -> #(None, [])
+      Some(input) -> {
+        let #(output, errors) = validator(input)
+        #(Some(output), errors)
+      }
+    }
+  }
+}
+
 /// This checks if a string follows a simple pattern `_@_`.
-pub fn string_is_email(error: e) -> Validator(String, String, e) {
+pub fn string_is_email(error error: err) -> Validator(String, String, err) {
   fn(value: String) {
-    let errors = non_empty_list.new(error, [])
-
     let pattern = "^([\\w\\d]+)(\\.[\\w\\d]+)*(\\+[\\w\\d]+)?@[\\w\\d\\.]+$"
 
     case regexp.from_string(pattern) {
       Ok(re) -> {
         case regexp.check(with: re, content: value) {
-          True -> Ok(value)
-          False -> Error(errors)
+          True -> #(value, [])
+          False -> #("", [error])
         }
       }
-      Error(_) -> Error(errors)
+      Error(_) -> #("", [error])
+    }
+  }
+}
+
+/// Validate if a string parses to an Int. Returns the Int if so.
+pub fn string_is_int(error error: err) -> Validator(String, Int, err) {
+  fn(value: String) {
+    case int.parse(value) {
+      Ok(int) -> #(int, [])
+      Error(_) -> #(0, [error])
+    }
+  }
+}
+
+/// Validate if a string parses to an Float. Returns the Float if so.
+pub fn string_is_float(error error: err) -> Validator(String, Float, err) {
+  fn(value: String) {
+    case float.parse(value) {
+      Ok(int) -> #(int, [])
+      Error(_) ->
+        case int.parse(value) {
+          Ok(int) -> #(int.to_float(int), [])
+          Error(_) -> #(0.0, [error])
+        }
+    }
+  }
+}
+
+/// Validate if a string parses to an Float. Returns the Float if so.
+pub fn string_is_float_strict(error error: err) -> Validator(String, Float, err) {
+  fn(value: String) {
+    case float.parse(value) {
+      Ok(int) -> #(int, [])
+      Error(_) -> #(0.0, [error])
+    }
+  }
+}
+
+/// Validate that a string is not empty
+pub fn string_is_not_empty(error error: err) -> Validator(String, String, err) {
+  fn(value: String) {
+    case string.is_empty(value) {
+      True -> #("", [error])
+      False -> #(value, [])
     }
   }
 }
 
 /// Validate the min length of a string
-pub fn string_min_length(min: Int, error: e) -> Validator(String, String, e) {
+pub fn string_min_length(
+  min min: Int,
+  error error: err,
+) -> Validator(String, String, err) {
   fn(value: String) {
     let len = string.length(value)
 
     case len < min {
-      True -> Error(non_empty_list.new(error, []))
-      False -> Ok(value)
+      True -> #("", [error])
+      False -> #(value, [])
     }
   }
 }
 
 /// Validate the max length of a string
-pub fn string_max_length(max: Int, error: e) -> Validator(String, String, e) {
+pub fn string_max_length(
+  max max: Int,
+  error error: err,
+) -> Validator(String, String, err) {
   fn(value: String) {
     let len = string.length(value)
 
     case len > max {
-      True -> Error(non_empty_list.new(error, []))
-      False -> Ok(value)
+      True -> #("", [error])
+      False -> #(value, [])
     }
   }
 }
 
-/// List checks
+/// Compose two validators.
+/// This will only return the first error found.
 ///
-/// Validate that a list is not empty
-pub fn list_is_not_empty(error: e) -> Validator(List(a), List(a), e) {
-  fn(value: List(a)) {
-    case list.is_empty(value) {
-      True -> Error(non_empty_list.new(error, []))
-      False -> Ok(value)
+/// e.g.
+/// ```gleam
+/// fn validator(input_name) {
+///   use name <- valid.check(
+///     input_name,
+///     valid.string_min_length(2, "Min 2")
+///       |> valid.then(valid.string_max_length(20, "Max 20")),
+///   )
+///
+/// valid.ok(name)
+/// }
+/// ```
+///
+pub fn then(first_validator first_validator, second_validator second_validator) {
+  fn(input) {
+    case first_validator(input) {
+      #(output, []) -> second_validator(output)
+      #(output, errors) -> #(output, errors)
     }
   }
 }
 
-/// Validate the min number of items in a list
-pub fn list_min_length(min: Int, error: e) -> Validator(List(a), List(a), e) {
-  fn(value: List(a)) {
-    case list.length(value) < min {
-      True -> Error(non_empty_list.new(error, []))
-      False -> Ok(value)
-    }
+/// Run a validator
+///
+/// ```gleam
+/// fn name_validator(input) {
+///   use name <- valid.check(input, valid.string_min_length(2, "Min 2"))
+///   valid.ok(name)
+/// }
+///
+/// let result = "Sally"
+/// |> valid.validate(name_validator)
+///
+/// result == Ok("Sally")
+///
+/// let result = ""
+/// |> valid.validate(name_validator)
+///
+/// result == Error(["Min 2"])
+/// ```
+///
+pub fn validate(input input: in, validator validator) {
+  let #(output, errors) = validator(input)
+
+  case errors {
+    [] -> Ok(output)
+    _ -> Error(errors)
   }
 }
-
-/// Validate the max number of items in a list
-pub fn list_max_length(max: Int, error: e) -> Validator(List(a), List(a), e) {
-  fn(value: List(a)) {
-    case list.length(value) > max {
-      True -> Error(non_empty_list.new(error, []))
-      False -> Ok(value)
-    }
-  }
-}
-
-/// Validate a list of items.
-///
-/// Run the given validator for each item returning all the errors.
-///
-/// ## Example
-///
-/// See <test/composition_test.gleam
-///
-pub fn list_every(validator: Validator(input, output, error)) {
-  fn(inputs: List(input)) {
-    list.fold(over: inputs, from: Ok([]), with: fn(acc, input) {
-      case validator(input) {
-        Ok(out) -> result.map(acc, fn(outs) { list.append(outs, [out]) })
-        Error(errors) -> add_errors(acc, errors)
-      }
-    })
-  }
-}
-
-/// Option checks
-///
-/// Validate that a value is not None.
-/// Returns the value if Some.
-///
-/// ## Example
-///
-/// See <test/validator_option_test.gleam
-///
-pub fn is_some(error: e) -> Validator(Option(a), a, e) {
-  fn(option: Option(a)) {
-    case option {
-      None -> Error(non_empty_list.new(error, []))
-      Some(value) -> Ok(value)
-    }
-  }
-}
-
-/// Validate an optional value.
-///
-/// Run the validator only if the value is Some.
-/// If the value is None then return None back.
-///
-/// ## Example
-///
-/// See <test/validator_optional_test.gleam>
-///
-pub fn if_some(
-  validator: Validator(a, b, error),
-) -> Validator(Option(a), Option(b), error) {
-  fn(maybe_a: Option(a)) {
-    case maybe_a {
-      None -> Ok(None)
-
-      Some(a) -> {
-        case validator(a) {
-          Ok(b) -> Ok(Some(b))
-          Error(error) -> Error(error)
-        }
-      }
-    }
-  }
-}
-// pub fn if_ok(
-//   validator: Validator(a, b, error),
-// ) -> Validator(Result(a, ae), Result(b, ae), error) {
-//   fn(result: Result(a, ae)) {
-//     case result {
-//       Error(ae) -> Ok(Error(ae))
-//       Ok(a) -> {
-//         case validator(a) {
-//           Ok(b) -> Ok(Ok(b))
-//           Error(error) -> Error(error)
-//         }
-//       }
-//     }
-//   }
-// }
