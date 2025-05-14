@@ -1,3 +1,25 @@
+# git-cliff ~ configuration file
+# https://git-cliff.org/docs/configuration
+
+[changelog]
+# template for the changelog body
+# https://keats.github.io/tera/docs/#introduction
+body = """
+# Changelog\n
+{% if version %}\
+    ## {{ version | trim_start_matches(pat="v") }} - {{ timestamp | date(format="%Y-%m-%d") }}\
+{% else %}\
+    ## Unreleased\
+{% endif %}
+{% for group, commits in commits | group_by(attribute="group") %}
+    ### {{ group | upper_first }}\n
+    {% for commit in commits %}\
+        - {% if commit.breaking %}[**breaking**] {% endif %}{{ commit.message | upper_first }}
+        {% if commit.breaking %}{{ commit.body }}{% endif %}
+    {% endfor %}\
+{% endfor %}\n
+"""
+
 [git]
 commit_parsers = [
   { message = "^feat", group = "Features" },
