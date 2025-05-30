@@ -8,9 +8,6 @@ API Docs: <https://hexdocs.pm/valid>.
 
 This library follows the principle [Parse don't validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/).
 
-The current version (v4) contains two APIs.
-The main one using pipelines. And a **experimental** one using `use`.
-
 ## API
 
 ```gleam
