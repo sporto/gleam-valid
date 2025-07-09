@@ -287,6 +287,21 @@ pub fn string_max_length(
   }
 }
 
+/// Trim the input
+///
+/// e.g.
+/// ```gleam
+///let validator = fn(input) {
+///  use out <- valid.check(input, valid.trim("  hello   "))
+///  //   ╰──── "hello"
+///  valid.ok(out)
+///}
+/// ```
+///
+pub fn trim() -> Validator(String, String, err) {
+  fn(value: String) { #(string.trim(value), []) }
+}
+
 /// Compose two validators.
 /// This will only return the first error found.
 ///

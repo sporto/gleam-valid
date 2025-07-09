@@ -201,6 +201,29 @@ pub fn string_is_int_test() {
   |> should.equal(Error(["NaN"]))
 }
 
+pub fn string_trim_test() {
+  let validator = fn(input) {
+    use out <- valid.check(input, valid.trim())
+    valid.ok(out)
+  }
+
+  "  hello     "
+  |> valid.validate(validator)
+  |> should.equal(Ok("hello"))
+
+  "hello       "
+  |> valid.validate(validator)
+  |> should.equal(Ok("hello"))
+
+  "       hello"
+  |> valid.validate(validator)
+  |> should.equal(Ok("hello"))
+
+  "hello"
+  |> valid.validate(validator)
+  |> should.equal(Ok("hello"))
+}
+
 pub fn string_is_float_test() {
   let validator = fn(input) {
     use out <- valid.check(input, valid.string_is_float("NaN"))
