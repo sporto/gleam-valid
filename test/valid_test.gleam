@@ -296,3 +296,15 @@ pub fn whole_test() {
   |> valid.validate(validator)
   |> should.equal(Error(["No match"]))
 }
+
+pub fn transform_test() {
+  let validator = fn(input) {
+    use out <- valid.check(string.trim(input), valid.ok)
+
+    valid.ok(out)
+  }
+
+  "    Sam   "
+  |> valid.validate(validator)
+  |> should.equal(Ok("Sam"))
+}
