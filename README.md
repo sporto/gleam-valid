@@ -37,7 +37,7 @@ A validator is a function that takes an input, and returns a tuple `#(output, er
 E.g.
 
 ```gleam
-import valid/experimental as valid
+import valid
 
 fn is_99(input) {
   case input == 99 {

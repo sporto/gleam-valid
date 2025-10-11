@@ -196,6 +196,18 @@ pub fn optional(validator validator) {
   }
 }
 
+/// Validate if a string parses to a Boolean. Returns the Boolean if so.
+pub fn string_is_bool(error error: err) -> Validator(String, Bool, err) {
+  fn(value: String) {
+    let lowered = string.lowercase(value)
+    case lowered {
+      "true" -> #(True, [])
+      "false" -> #(False, [])
+      _ -> #(False, [error])
+    }
+  }
+}
+
 /// This checks if a string follows a simple pattern `_@_`.
 pub fn string_is_email(error error: err) -> Validator(String, String, err) {
   fn(value: String) {
