@@ -240,7 +240,7 @@ pub fn string_is_float_strict_test() {
 }
 
 pub fn then_test() {
-  let name_validator = fn(input_name) {
+  let validator = fn(input_name) {
     use name <- valid.check(
       input_name,
       valid.is_some("", valid.ok, "Input")
@@ -250,25 +250,17 @@ pub fn then_test() {
     valid.ok(name)
   }
 
-  let validator = fn(tuple) {
-    let #(age, name) = tuple
-    use age <- valid.check(age, valid.int_min(13, "Age"))
-    use name <- valid.check(name, name_validator)
-
-    valid.ok(#(age, name))
-  }
-
-  #(13, None)
+  None
   |> valid.validate(validator)
   |> should.equal(Error(["Input"]))
 
-  #(13, Some(""))
+  Some("")
   |> valid.validate(validator)
   |> should.equal(Error(["Size"]))
 
-  #(13, Some("Sam"))
+  Some("Sam")
   |> valid.validate(validator)
-  |> should.equal(Ok(#(13, "Sam")))
+  |> should.equal(Ok("Sam"))
 }
 
 pub fn whole_test() {

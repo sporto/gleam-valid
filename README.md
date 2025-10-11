@@ -54,6 +54,22 @@ fn validator(input) {
 
 A validator must return a default value. This is so we can collect all the errors for all validators (instead of returning early).
 
+### Composing validators
+
+You can use `then` two chain two validators:
+
+```gleam
+fn (input_name: Option(String)) {
+  use name <- valid.check(
+    input_name,
+    valid.is_some("", valid.ok, "Input")
+      |> valid.then(valid.string_min_length(2, "Size")),
+  )
+
+  valid.ok(name)
+}
+```
+
 ### Using own errors
 
 By using your own errors you can add information to link to the source of the issue. e.g.

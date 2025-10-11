@@ -215,10 +215,7 @@ pub fn string_is_email(error error: err) -> Validator(String, String, err) {
 
     case regexp.from_string(pattern) {
       Ok(re) -> {
-        case regexp.check(with: re, content: value) {
-          True -> #(value, [])
-          False -> #("", [error])
-        }
+        string_matches_regex(re, error)(value)
       }
       Error(_) -> #("", [error])
     }
@@ -265,6 +262,19 @@ pub fn string_is_not_empty(error error: err) -> Validator(String, String, err) {
     case string.is_empty(value) {
       True -> #("", [error])
       False -> #(value, [])
+    }
+  }
+}
+
+/// Checks if a string matches a given regex
+pub fn string_matches_regex(
+  re re: regexp.Regexp,
+  error error: err,
+) -> Validator(String, String, err) {
+  fn(value: String) {
+    case regexp.check(with: re, content: value) {
+      True -> #(value, [])
+      False -> #("", [error])
     }
   }
 }
