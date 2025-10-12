@@ -222,6 +222,20 @@ pub fn string_is_email(error error: err) -> Validator(String, String, err) {
   }
 }
 
+/// Check if a string converts to a custom type
+// pub fn string_is_custom_type(
+//   default default: out,
+//   fun fun: fn(String) -> Result(out, Nil),
+//   error error: err,
+// ) -> Validator(String, out, err) {
+//   fn(value: String) {
+//     case fun(value) {
+//       Ok(custom) -> #(custom, [])
+//       Error(_) -> #(default, [error])
+//     }
+//   }
+// }
+
 /// Validate if a string parses to an Int. Returns the Int if so.
 pub fn string_is_int(error error: err) -> Validator(String, Int, err) {
   fn(value: String) {

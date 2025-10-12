@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Add string_is_bool
+
+- Add string_matches_regex
+
+
+# Changelog
+
 ## 5.0.0 - 2025-05-14
 
 ### Features
@@ -43,4 +54,8 @@ of `use`.
 
 - Allow . for seperate firstname and lastname in email format
 
+
+# Changelog
+
+## 0.3.0 - 2024-03-10
 
