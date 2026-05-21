@@ -7,7 +7,7 @@ repository = { type = "github", user = "sporto", repo = "gleam-valid" }
 
 
 [dependencies]
-gleam_stdlib = "~> 0.38"
+gleam_stdlib = ">= 0.38.0 and < 2.0.0"
 non_empty_list = ">= 2.0.0 and < 3.0.0"
 gleam_regexp = ">= 1.0.0 and < 2.0.0"
 
