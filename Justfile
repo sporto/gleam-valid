@@ -1,11 +1,8 @@
-changelog:
-  git cliff --output CHANGELOG.md
-
 test:
-	gleam test
+    gleam test
 
 docs:
-	gleam docs build
+    gleam docs build
 
 publish:
-	gleam publish
+    gleam publish
