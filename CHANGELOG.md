@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.2.0 - 2026-08-05
+
+### Added
+
+- Added check `is_ok`
+
 ## 5.1.1 - 2026-05-22
 
 ### Changed

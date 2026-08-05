@@ -1,3 +1,4 @@
+import gleam/function
 import gleam/option.{None, Some}
 import gleam/string
 import gleeunit
@@ -14,6 +15,17 @@ pub type InputUser {
 
 pub type ValidUser {
   ValidUser(age: Int, name: String, email: String)
+}
+
+pub type Status {
+  Active
+}
+
+pub fn status_from_code(code: String) {
+  case code {
+    "Active" -> Ok(Active)
+    _ -> Error("Invalid " <> code)
+  }
 }
 
 fn user_validator(input: InputUser) {
@@ -237,6 +249,24 @@ pub fn string_is_float_strict_test() {
   "Hello"
   |> valid.validate(validator)
   |> should.equal(Error(["NaN"]))
+}
+
+pub fn is_ok_test() {
+  let validator = fn(input) {
+    use out <- valid.check(
+      input,
+      valid.is_ok(Active, status_from_code, function.identity),
+    )
+    valid.ok(out)
+  }
+
+  "Active"
+  |> valid.validate(validator)
+  |> should.equal(Ok(Active))
+
+  "Pending"
+  |> valid.validate(validator)
+  |> should.equal(Error(["Invalid Pending"]))
 }
 
 pub fn then_test() {

@@ -222,19 +222,53 @@ pub fn string_is_email(error error: err) -> Validator(String, String, err) {
   }
 }
 
-/// Check if a string converts to a custom type
-// pub fn string_is_custom_type(
-//   default default: out,
-//   fun fun: fn(String) -> Result(out, Nil),
-//   error error: err,
-// ) -> Validator(String, out, err) {
-//   fn(value: String) {
-//     case fun(value) {
-//       Ok(custom) -> #(custom, [])
-//       Error(_) -> #(default, [error])
-//     }
-//   }
-// }
+/// Given a function that takes a value and returns a result
+/// Check if this function return Ok
+/// Use this for parsing values into custom types
+///
+/// E.g. given a custom type
+///
+/// ```gleam
+/// type Status {
+///   Active
+///	  Pending
+/// }
+/// ```
+///
+/// And a function like:
+/// ```gleam
+/// pub fn status_from_code(code: String) {
+///   case code {
+///     "Active" -> Ok(Active)
+///     "Pending" -> Ok(Pending)
+///     _ -> Error("Invalid " <> code)
+///   }
+/// }
+/// ```
+///
+/// You can create a validator like:
+/// ```gleam
+/// use status <- valid.check(
+///   input,
+///   valid.is_ok(Active, status_from_code, function.identity),
+/// )
+/// ```
+///
+/// In this case you are likely to have the error from `status_from_code` in the validation error.
+/// So the third argument is a function that maps the error of `status_from_code`
+/// to the error type used in the validator.
+pub fn is_ok(
+  default default: out,
+  fun fun: fn(in) -> Result(out, out_err),
+  make_error make_error: fn(out_err) -> err,
+) -> Validator(in, out, err) {
+  fn(value: in) {
+    case fun(value) {
+      Ok(custom) -> #(custom, [])
+      Error(error) -> #(default, [make_error(error)])
+    }
+  }
+}
 
 /// Validate if a string parses to an Int. Returns the Int if so.
 pub fn string_is_int(error error: err) -> Validator(String, Int, err) {
@@ -261,7 +295,9 @@ pub fn string_is_float(error error: err) -> Validator(String, Float, err) {
 }
 
 /// Validate if a string parses to an Float. Returns the Float if so.
-pub fn string_is_float_strict(error error: err) -> Validator(String, Float, err) {
+pub fn string_is_float_strict(
+  error error: err,
+) -> Validator(String, Float, err) {
   fn(value: String) {
     case float.parse(value) {
       Ok(int) -> #(int, [])
@@ -339,7 +375,10 @@ pub fn string_max_length(
 /// }
 /// ```
 ///
-pub fn then(first_validator first_validator, second_validator second_validator) {
+pub fn then(
+  first_validator first_validator,
+  second_validator second_validator,
+) {
   fn(input) {
     case first_validator(input) {
       #(output, []) -> second_validator(output)
