@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.3.0 - 2026-09-01
+
+### Changed
+
+- Simplify validation in `string_is_email`, so it doesn't fail with some valid emails.
+
 ## 5.2.0 - 2026-08-05
 
 ### Added
@@ -24,8 +30,8 @@
 ### Changed
 
 - [**breaking**] Move to 'use' API
-This release removes the previous pipeline api, in favour
-of `use`.
+  This release removes the previous pipeline api, in favour
+  of `use`.
 
 ## 4.5.0 - 2025-04-18
 

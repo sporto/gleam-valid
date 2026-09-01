@@ -212,6 +212,10 @@ pub fn string_is_email_test() {
   "this.is@valid-email.com"
   |> valid.validate(validator)
   |> should.equal(Ok("this.is@valid-email.com"))
+
+  "user+x@domain.com"
+  |> valid.validate(validator)
+  |> should.equal(Ok("user+x@domain.com"))
 }
 
 pub fn string_not_empty_test() {

@@ -209,6 +209,7 @@ pub fn string_is_bool(error error: err) -> Validator(String, Bool, err) {
 }
 
 /// This checks if a string follows a simple pattern `_@_`.
+/// This validation doesn't attempt to be too strict, as validation emails is hard.
 pub fn string_is_email(error error: err) -> Validator(String, String, err) {
   fn(value: String) {
     let on_error = #("", [error])
