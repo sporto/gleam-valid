@@ -179,6 +179,41 @@ pub fn optional_test() {
   |> should.equal(Error(["Empty"]))
 }
 
+pub fn string_is_email_test() {
+  let validator = fn(input) {
+    use out <- valid.check(input, valid.string_is_email("Invalid"))
+    valid.ok(out)
+  }
+
+  ""
+  |> valid.validate(validator)
+  |> should.equal(Error(["Invalid"]))
+
+  "@"
+  |> valid.validate(validator)
+  |> should.equal(Error(["Invalid"]))
+
+  "a@"
+  |> valid.validate(validator)
+  |> should.equal(Error(["Invalid"]))
+
+  "@a"
+  |> valid.validate(validator)
+  |> should.equal(Error(["Invalid"]))
+
+  "a@@a"
+  |> valid.validate(validator)
+  |> should.equal(Error(["Invalid"]))
+
+  "s@s"
+  |> valid.validate(validator)
+  |> should.equal(Ok("s@s"))
+
+  "this.is@valid-email.com"
+  |> valid.validate(validator)
+  |> should.equal(Ok("this.is@valid-email.com"))
+}
+
 pub fn string_not_empty_test() {
   let validator = fn(input) {
     use out <- valid.check(input, valid.string_is_not_empty("Empty"))

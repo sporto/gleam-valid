@@ -211,13 +211,22 @@ pub fn string_is_bool(error error: err) -> Validator(String, Bool, err) {
 /// This checks if a string follows a simple pattern `_@_`.
 pub fn string_is_email(error error: err) -> Validator(String, String, err) {
   fn(value: String) {
-    let pattern = "^([\\w\\d]+)(\\.[\\w\\d]+)*(\\+[\\w\\d]+)?@[\\w\\d\\.]+$"
+    let on_error = #("", [error])
 
-    case regexp.from_string(pattern) {
-      Ok(re) -> {
-        string_matches_regex(re, error)(value)
-      }
-      Error(_) -> #("", [error])
+    let check = fn(v) {
+      !string.is_empty(v)
+      && !string.contains(v, "@")
+      && !string.starts_with(v, ".")
+      && !string.ends_with(v, ".")
+    }
+
+    case string.split_once(value, "@") {
+      Error(_) -> on_error
+      Ok(#(left, right)) ->
+        case check(left), check(right) {
+          True, True -> #(value, [])
+          _, _ -> on_error
+        }
     }
   }
 }
